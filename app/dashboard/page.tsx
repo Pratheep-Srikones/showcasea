@@ -1,10 +1,25 @@
-import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, Grid, List, Upload, Heart, MessageSquare, Eye } from "lucide-react"
-import { DashboardSidebar } from "@/components/dashboard-sidebar"
-import { AddArtworkModal } from "@/components/add-artwork-modal"
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Plus,
+  Grid,
+  List,
+  Upload,
+  Heart,
+  MessageSquare,
+  Eye,
+} from "lucide-react";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
+import { AddArtworkModal } from "@/components/add-artwork-modal";
 
 // Dummy data for user's artworks
 const userArtworks = [
@@ -48,7 +63,7 @@ const userArtworks = [
     views: 654,
     date: "3 weeks ago",
   },
-]
+];
 
 export default function DashboardPage() {
   return (
@@ -59,45 +74,59 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, Alex! Manage your artworks and account.</p>
+              <p className="text-muted-foreground">
+                Welcome back, Alex! Manage your artworks and account.
+              </p>
             </div>
             <AddArtworkModal>
-              <Button>
+              <Button className="flex items-center gap-2">
                 <Plus className="mr-2 h-4 w-4" />
                 Add New Artwork
               </Button>
             </AddArtworkModal>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Views
+                </CardTitle>
                 <Eye className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">4,337</div>
-                <p className="text-xs text-muted-foreground">+12% from last month</p>
+                <p className="text-xs text-muted-foreground">
+                  +12% from last month
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Likes</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Likes
+                </CardTitle>
                 <Heart className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">447</div>
-                <p className="text-xs text-muted-foreground">+8% from last month</p>
+                <p className="text-xs text-muted-foreground">
+                  +8% from last month
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Comments</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Comments
+                </CardTitle>
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">63</div>
-                <p className="text-xs text-muted-foreground">+19% from last month</p>
+                <p className="text-xs text-muted-foreground">
+                  +19% from last month
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -137,8 +166,12 @@ export default function DashboardPage() {
                       </div>
                     </CardContent>
                     <CardHeader className="p-4">
-                      <CardTitle className="line-clamp-1 text-lg">{artwork.title}</CardTitle>
-                      <CardDescription className="line-clamp-2">{artwork.description}</CardDescription>
+                      <CardTitle className="line-clamp-1 text-lg">
+                        {artwork.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-2">
+                        {artwork.description}
+                      </CardDescription>
                     </CardHeader>
                     <CardFooter className="flex justify-between p-4 pt-0">
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -155,7 +188,9 @@ export default function DashboardPage() {
                           <span>{artwork.views}</span>
                         </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">{artwork.date}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {artwork.date}
+                      </div>
                     </CardFooter>
                   </Card>
                 ))}
@@ -166,7 +201,9 @@ export default function DashboardPage() {
                 {userArtworks.map((artwork, index) => (
                   <div
                     key={artwork.id}
-                    className={`flex items-center p-4 ${index !== userArtworks.length - 1 ? "border-b" : ""}`}
+                    className={`flex items-center p-4 ${
+                      index !== userArtworks.length - 1 ? "border-b" : ""
+                    }`}
                   >
                     <div className="relative h-16 w-16 overflow-hidden rounded-md">
                       <Image
@@ -179,7 +216,9 @@ export default function DashboardPage() {
                     </div>
                     <div className="ml-4 flex-1 space-y-1">
                       <p className="font-medium">{artwork.title}</p>
-                      <p className="text-sm text-muted-foreground">{artwork.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {artwork.description}
+                      </p>
                     </div>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
@@ -195,7 +234,9 @@ export default function DashboardPage() {
                         <span>{artwork.views}</span>
                       </div>
                     </div>
-                    <div className="ml-4 text-xs text-muted-foreground">{artwork.date}</div>
+                    <div className="ml-4 text-xs text-muted-foreground">
+                      {artwork.date}
+                    </div>
                     <Button variant="ghost" size="icon" className="ml-4">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -223,5 +264,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
