@@ -1,33 +1,106 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft } from "lucide-react"
-
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft } from "lucide-react";
+import { trpc } from "@/lib/trpc/client";
+type SignUpData = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  username: string;
+  password: string;
+};
 export default function AuthPage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const [activeTab, setActiveTab] = useState("login")
+  const mutation = trpc.user.signUp.useMutation();
+
+  const [signupData, setSignUpData] = useState<SignUpData>({
+    first_name: "",
+    last_name: "",
+    email: "",
+    username: "",
+    password: "",
+  });
+
+  const [acceptedPolicy, setAcceptedPolicy] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+
+  const isValidEmail = (email: string) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("login");
 
   useEffect(() => {
-    const tab = searchParams.get("tab")
+    const tab = searchParams.get("tab");
     if (tab === "login" || tab === "signup") {
-      setActiveTab(tab)
+      setActiveTab(tab);
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value)
-    router.push(`/auth?tab=${value}`)
-  }
+    setActiveTab(value);
+    router.push(`/auth?tab=${value}`);
+  };
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
 
+    if (!acceptedPolicy || !isValidEmail(signupData.email)) {
+      alert("Please accept the terms and conditions and provide a valid email");
+      return;
+    }
+
+    if (
+      !signupData.first_name ||
+      !signupData.last_name ||
+      !signupData.username ||
+      !signupData.email ||
+      !signupData.password
+    ) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    if (signupData.password.length < 8) {
+      alert("Password must be at least 8 characters long");
+      return;
+    }
+
+    if (emailError) {
+      alert(emailError);
+      return;
+    }
+
+    mutation.mutate(
+      {
+        first_name: signupData.first_name,
+        last_name: signupData.last_name,
+        email: signupData.email,
+        username: signupData.username,
+        password: signupData.password,
+      },
+      {
+        onSuccess: (data) => {
+          console.log("Signup successful:", data);
+        },
+        onError: (error) => {
+          console.error("Signup failed:", error.message);
+        },
+      }
+    );
+  };
   return (
     <div className="container relative min-h-[calc(100vh-4rem)] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <Link
@@ -57,8 +130,9 @@ export default function AuthPage() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              "Showcasa has transformed how I present my artwork to the world. The platform's elegant design and
-              intuitive interface make it the perfect canvas for my creative journey."
+              "Showcasa has transformed how I present my artwork to the world.
+              The platform's elegant design and intuitive interface make it the
+              perfect canvas for my creative journey."
             </p>
             <footer className="text-sm">Sofia Chen, Digital Artist</footer>
           </blockquote>
@@ -76,12 +150,21 @@ export default function AuthPage() {
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">Welcome to Showcasa</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Welcome to Showcasa
+            </h1>
             <p className="text-sm text-muted-foreground">
-              {activeTab === "login" ? "Sign in to your account" : "Create your account to get started"}
+              {activeTab === "login"
+                ? "Sign in to your account"
+                : "Create your account to get started"}
             </p>
           </div>
-          <Tabs defaultValue={activeTab} value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <Tabs
+            defaultValue={activeTab}
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -90,12 +173,19 @@ export default function AuthPage() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" placeholder="name@example.com" type="email" />
+                  <Input
+                    id="email"
+                    placeholder="name@example.com"
+                    type="email"
+                  />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password">Password</Label>
-                    <Link href="/forgot-password" className="text-xs text-muted-foreground hover:underline">
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs text-muted-foreground hover:underline"
+                    >
                       Forgot password?
                     </Link>
                   </div>
@@ -120,42 +210,158 @@ export default function AuthPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="first-name">First name</Label>
-                    <Input id="first-name" placeholder="John" />
+                    <Input
+                      id="first-name"
+                      placeholder="John"
+                      value={signupData.first_name}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signupData,
+                          first_name: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="last-name">Last name</Label>
-                    <Input id="last-name" placeholder="Doe" />
+                    <Input
+                      id="last-name"
+                      placeholder="Doe"
+                      value={signupData.last_name}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signupData,
+                          last_name: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="username">Username</Label>
-                  <Input id="username" placeholder="johndoe" />
+                  <Input
+                    id="username"
+                    placeholder="johndoe"
+                    value={signupData.username}
+                    onChange={(e) =>
+                      setSignUpData({
+                        ...signupData,
+                        username: e.target.value,
+                      })
+                    }
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" placeholder="name@example.com" type="email" />
+                  <Input
+                    id="email"
+                    placeholder="name@example.com"
+                    type="email"
+                    value={signupData.email}
+                    onChange={(e) => {
+                      setSignUpData({ ...signupData, email: e.target.value });
+                      setEmailError(
+                        isValidEmail(e.target.value)
+                          ? ""
+                          : "Invalid email format"
+                      );
+                    }}
+                    className={emailError ? "border-red-500" : ""}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={signupData.password}
+                      onChange={(e) =>
+                        setSignUpData({
+                          ...signupData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="size-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="size-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" />
+                  <Checkbox
+                    id="terms"
+                    checked={acceptedPolicy}
+                    onCheckedChange={(checked) =>
+                      setAcceptedPolicy(checked === true)
+                    }
+                  />
                   <label
                     htmlFor="terms"
                     className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     I agree to the{" "}
-                    <Link href="/terms" className="text-primary hover:underline">
+                    <Link
+                      href="/terms"
+                      className="text-primary hover:underline"
+                    >
                       terms of service
                     </Link>{" "}
                     and{" "}
-                    <Link href="/privacy" className="text-primary hover:underline">
+                    <Link
+                      href="/privacy"
+                      className="text-primary hover:underline"
+                    >
                       privacy policy
                     </Link>
                   </label>
                 </div>
-                <Button className="w-full" type="submit">
+                <Button
+                  className="w-full"
+                  type="submit"
+                  disabled={!acceptedPolicy || !isValidEmail(signupData.email)}
+                  onClick={handleSignUp}
+                >
                   Create Account
                 </Button>
               </div>
@@ -166,7 +372,9 @@ export default function AuthPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">
+                Or continue with
+              </span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -193,7 +401,11 @@ export default function AuthPage() {
               Google
             </Button>
             <Button variant="outline">
-              <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="mr-2 h-4 w-4"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
               </svg>
               GitHub
@@ -202,5 +414,5 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
