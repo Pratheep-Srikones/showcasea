@@ -34,6 +34,7 @@ export default function RootLayout({
             </div>
           </ThemeProvider>
         </Providers>
+        <Toaster />
       </body>
     </html>
   );
@@ -41,3 +42,4 @@ export default function RootLayout({
 
 import "./globals.css";
 import { Providers } from "./providers";
+import { Toaster } from "react-hot-toast";

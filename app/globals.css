@@ -34,6 +34,13 @@
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --toast-bg-color: #ffffff;
+    --toast-text-color: #1f2937;
+    --toast-border-color: #e5e7eb;
+    --toast-icon-primary-color: #10b981; /* green for success */
+    --toast-icon-secondary-color: #ffffff;
+    --toast-error-icon-bg: #ef4444; /* red for error */
   }
 
   .dark {
@@ -66,6 +73,12 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    --toast-bg-color: #1f2937;
+    --toast-text-color: #f3f4f6;
+    --toast-border-color: #374151;
+    --toast-icon-primary-color: #34d399;
+    --toast-error-icon-bg: #f87171;
   }
 }
 

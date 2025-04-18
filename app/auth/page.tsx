@@ -11,6 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
+import { toastError, toastSuccess } from "@/lib/helpers/toast";
+type loginData = {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+};
 type SignUpData = {
   first_name: string;
   last_name: string;
@@ -19,7 +25,8 @@ type SignUpData = {
   password: string;
 };
 export default function AuthPage() {
-  const mutation = trpc.user.signUp.useMutation();
+  const signup = trpc.user.signUp.useMutation();
+  const login = trpc.user.login.useMutation();
 
   const [signupData, setSignUpData] = useState<SignUpData>({
     first_name: "",
@@ -27,6 +34,11 @@ export default function AuthPage() {
     email: "",
     username: "",
     password: "",
+  });
+  const [loginData, setLoginData] = useState<loginData>({
+    email: "",
+    password: "",
+    rememberMe: false,
   });
 
   const [acceptedPolicy, setAcceptedPolicy] = useState(false);
@@ -48,12 +60,27 @@ export default function AuthPage() {
     if (tab === "login" || tab === "signup") {
       setActiveTab(tab);
     }
+    setSignUpData({
+      first_name: "",
+      last_name: "",
+      email: "",
+      username: "",
+      password: "",
+    });
+    setLoginData({
+      email: "",
+      password: "",
+      rememberMe: false,
+    });
+    setAcceptedPolicy(false);
+    setEmailError("");
   }, [searchParams]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     router.push(`/auth?tab=${value}`);
   };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -83,7 +110,7 @@ export default function AuthPage() {
       return;
     }
 
-    mutation.mutate(
+    signup.mutate(
       {
         first_name: signupData.first_name,
         last_name: signupData.last_name,
@@ -93,10 +120,44 @@ export default function AuthPage() {
       },
       {
         onSuccess: (data) => {
-          console.log("Signup successful:", data);
+          toastSuccess(data.message);
         },
         onError: (error) => {
-          console.error("Signup failed:", error.message);
+          toastError(error.message);
+        },
+      }
+    );
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!loginData.email || !loginData.password) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    if (emailError) {
+      alert(emailError);
+      return;
+    }
+
+    // Call your login mutation here
+    console.log("Login data:", loginData);
+
+    login.mutate(
+      {
+        email: loginData.email,
+        password: loginData.password,
+        rememberMe: loginData.rememberMe,
+      },
+      {
+        onSuccess: (data) => {
+          toastSuccess("Login successful");
+          router.replace("/dashboard");
+        },
+        onError: (error) => {
+          toastError(error.message);
         },
       }
     );
@@ -177,6 +238,16 @@ export default function AuthPage() {
                     id="email"
                     placeholder="name@example.com"
                     type="email"
+                    value={loginData.email}
+                    onChange={(e) => {
+                      setLoginData({ ...loginData, email: e.target.value });
+                      setEmailError(
+                        isValidEmail(e.target.value)
+                          ? ""
+                          : "Invalid email format"
+                      );
+                    }}
+                    className={emailError ? "border-red-500" : ""}
                   />
                 </div>
                 <div className="space-y-2">
@@ -189,10 +260,74 @@ export default function AuthPage() {
                       Forgot password?
                     </Link>
                   </div>
-                  <Input id="password" type="password" />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      value={loginData.password}
+                      onChange={(e) =>
+                        setLoginData({
+                          ...loginData,
+                          password: e.target.value,
+                        })
+                      }
+                      className="pr-10"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-muted-foreground"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                      {showPassword ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="size-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88"
+                          />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="size-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" />
+                  <Checkbox
+                    id="remember"
+                    checked={loginData.rememberMe}
+                    onCheckedChange={(checked) =>
+                      setLoginData({
+                        ...loginData,
+                        rememberMe: checked === true,
+                      })
+                    }
+                  />
                   <label
                     htmlFor="remember"
                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -200,7 +335,7 @@ export default function AuthPage() {
                     Remember me
                   </label>
                 </div>
-                <Button className="w-full" type="submit">
+                <Button className="w-full" type="submit" onClick={handleLogin}>
                   Login
                 </Button>
               </div>
