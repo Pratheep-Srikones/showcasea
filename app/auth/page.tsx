@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
 import { toastError, toastSuccess } from "@/lib/helpers/toast";
+import { useAuthStore } from "@/store/useAuthStore";
 type loginData = {
   email: string;
   password: string;
@@ -27,6 +28,8 @@ type SignUpData = {
 export default function AuthPage() {
   const signup = trpc.user.signUp.useMutation();
   const login = trpc.user.login.useMutation();
+
+  const { setIsAuthenticated, setUser } = useAuthStore();
 
   const [signupData, setSignUpData] = useState<SignUpData>({
     first_name: "",
@@ -120,7 +123,16 @@ export default function AuthPage() {
       },
       {
         onSuccess: (data) => {
-          toastSuccess(data.message);
+          toastSuccess("Signup successful. Please login.");
+          setActiveTab("login");
+          router.push("/auth?tab=login");
+          setSignUpData({
+            first_name: "",
+            last_name: "",
+            email: "",
+            username: "",
+            password: "",
+          });
         },
         onError: (error) => {
           toastError(error.message);
@@ -153,6 +165,8 @@ export default function AuthPage() {
       },
       {
         onSuccess: (data) => {
+          setUser(data.user);
+          setIsAuthenticated(true);
           toastSuccess("Login successful");
           router.replace("/dashboard");
         },
@@ -163,7 +177,7 @@ export default function AuthPage() {
     );
   };
   return (
-    <div className="container relative min-h-[calc(100vh-4rem)] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container relative grid h-screen place-items-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <Link
         href="/"
         className="absolute left-4 top-4 md:left-8 md:top-8 flex items-center text-sm font-medium text-muted-foreground"

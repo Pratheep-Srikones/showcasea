@@ -78,12 +78,6 @@ export const loginUser = async ({
   user.password = ""; // Remove password from user object
   return {
     message: "Login successful",
-    user: {
-      id: user._id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      username: user.username,
-    },
+    user: user,
   };
 };
