@@ -81,3 +81,21 @@ export const loginUser = async ({
     user: user,
   };
 };
+
+export const getUserById = async (id: string) => {
+  if (!id) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "User ID is required",
+    });
+  }
+  const user = await User.findById(id).select("-password"); // Exclude password from the result
+  if (!user) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "User not found",
+    });
+  }
+
+  return user;
+};

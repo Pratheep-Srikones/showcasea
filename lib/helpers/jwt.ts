@@ -8,5 +8,5 @@ export function generateToken(payload: any) {
 }
 
 export function verifyToken(token: string) {
-  return jwt.verify(token, JWT_SECRET);
+  return jwt.verify(token, JWT_SECRET) as { id: string; email: string };
 }

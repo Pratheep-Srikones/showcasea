@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ImageIcon,
@@ -25,6 +25,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -38,6 +39,9 @@ export function DashboardSidebar() {
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
     { name: "Settings", href: "/account", icon: Settings },
   ];
+
+  const { logout } = useAuthStore();
+  const router = useRouter();
 
   return (
     <div>
@@ -99,7 +103,7 @@ export function DashboardSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href="/logout">
                     <LogOut className="h-5 w-5" />
-                    <span>Logout</span>
+                    <span onClick={() => logout(router)}>Logout</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
