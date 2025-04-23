@@ -1,4 +1,8 @@
-import { uploadPostImage, uploadProfileImage } from "@/lib/cloud/cloudinary";
+import {
+  uploadArworkImagesGetUrls,
+  uploadPostImage,
+  uploadProfileImage,
+} from "@/lib/cloud/cloudinary";
 import { protectedProcedure, publicProcedure, router } from "@/lib/trpc/server";
 import { z } from "zod";
 
@@ -16,5 +20,13 @@ export const imageRouter = router({
       const uploadRes = await uploadPostImage(input);
       console.log(uploadRes);
       return uploadRes.secure_url;
+    }),
+
+  uploadArtWorkImages: protectedProcedure
+    .input(z.array(z.string()))
+    .mutation(async ({ ctx, input }) => {
+      const uploadRes = await uploadArworkImagesGetUrls(input);
+      console.log(uploadRes);
+      return uploadRes;
     }),
 });

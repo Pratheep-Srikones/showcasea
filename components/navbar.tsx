@@ -53,7 +53,7 @@ export function Navbar() {
     { name: "Account", href: "/account" },
   ];
 
-  const { isAuthenticated, logout } = useAuthStore();
+  const { isAuthenticated, logout, user } = useAuthStore();
   const router = useRouter();
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -101,8 +101,11 @@ export function Navbar() {
                   className="relative h-8 w-8 rounded-full"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-                    <AvatarFallback>SC</AvatarFallback>
+                    <AvatarImage src={user?.profile_picture_url} alt="@user" />
+                    <AvatarFallback>
+                      {user?.first_name[0].toUpperCase()}
+                      {user?.last_name[0].toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -110,10 +113,10 @@ export function Navbar() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      Alex Chen
+                      {user?.username}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      alex@showcasa.com
+                      {user?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>

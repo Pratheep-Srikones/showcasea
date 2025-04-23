@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -16,6 +17,26 @@ export const uploadPostImage = async (file: string) => {
   return await cloudinary.uploader.upload(file, {
     folder: "posts",
   });
+};
+
+export const uploadArworkImagesGetUrls = async (files: string[]) => {
+  try {
+    const uploadPromises = files.map((file) =>
+      cloudinary.uploader.upload(file, {
+        folder: "posts",
+      })
+    );
+
+    const uploadResults = await Promise.all(uploadPromises);
+
+    return uploadResults.map((result) => result.secure_url);
+  } catch (error) {
+    console.error("Error uploading images:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to upload images",
+    });
+  }
 };
 
 export const extractPublicId = (secureUrl: string): string | null => {

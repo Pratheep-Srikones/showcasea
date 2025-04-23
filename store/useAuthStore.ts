@@ -1,12 +1,12 @@
-import { User } from "@/types/types";
+import { UserType } from "@/types/types";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 interface AuthState {
-  user: User | null;
+  user: UserType | null;
   isAuthenticated: boolean;
-  setUser: (user: User | null) => void;
+  setUser: (user: UserType | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   logout: (router: AppRouterInstance) => void;
 }
@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
-      setUser: (user: User | null) => set({ user }),
+      setUser: (user: UserType | null) => set({ user }),
       setIsAuthenticated: (isAuthenticated: boolean) =>
         set({ isAuthenticated }),
       logout: (router: AppRouterInstance) => {

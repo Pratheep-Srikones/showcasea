@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
   Instagram,
   Twitter,
 } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
 
 // Dummy data for user profile
 const userProfile = {
@@ -102,12 +104,13 @@ const userProfile = {
 };
 
 export default function UserProfilePage() {
+  const { user } = useAuthStore();
   return (
     <div className="flex flex-col min-h-screen">
       {/* Cover Image */}
       <div className="relative h-[200px] md:h-[300px] w-full overflow-hidden">
         <Image
-          src={userProfile.coverImage || "/placeholder.svg"}
+          src={"/cover.jpeg"}
           alt="Cover"
           fill
           className="object-cover"
@@ -121,16 +124,19 @@ export default function UserProfilePage() {
           <div className="flex flex-col items-center md:flex-row md:items-end gap-4">
             <Avatar className="h-32 w-32 border-4 border-background">
               <AvatarImage
-                src={userProfile.avatar || "/placeholder.svg"}
-                alt={userProfile.name}
+                src={user?.profile_picture_url}
+                alt={user?.username}
               />
-              <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="text-5xl font-bold">
+                {user?.first_name[0].toUpperCase()}
+                {user?.last_name[0].toUpperCase()}
+              </AvatarFallback>
             </Avatar>
             <div className="mt-4 md:mt-0 text-center md:text-left">
               <h1 className="text-2xl md:text-3xl font-bold">
-                {userProfile.name}
+                {user?.first_name} {user?.last_name}
               </h1>
-              <p className="text-muted-foreground">@{userProfile.username}</p>
+              <p className="text-muted-foreground">@{user?.username}</p>
             </div>
           </div>
           <div className="mt-4 md:mt-0 flex gap-2">
@@ -149,41 +155,41 @@ export default function UserProfilePage() {
               <div className="p-6">
                 <h3 className="font-medium">About</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {userProfile.bio}
+                  {user?.bio || "No bio available."}
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2">
-                  {userProfile.links.website && (
+                  {user?.social_media?.website && (
                     <a
-                      href={userProfile.links.website}
+                      href={user?.social_media?.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <LinkIcon className="h-4 w-4" />
-                      <span>{userProfile.links.website}</span>
+                      <span>{user?.social_media?.website}</span>
                     </a>
                   )}
-                  {userProfile.links.instagram && (
+                  {user?.social_media?.instagram && (
                     <a
-                      href={`https://instagram.com/${userProfile.links.instagram}`}
+                      href={`https://instagram.com/${user?.social_media?.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <Instagram className="h-4 w-4" />
-                      <span>@{userProfile.links.instagram}</span>
+                      <span>@{user?.social_media?.instagram}</span>
                     </a>
                   )}
-                  {userProfile.links.twitter && (
+                  {user?.social_media?.twitter && (
                     <a
-                      href={`https://twitter.com/${userProfile.links.twitter}`}
+                      href={`https://twitter.com/${user?.social_media?.twitter}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <Twitter className="h-4 w-4" />
-                      <span>@{userProfile.links.twitter}</span>
+                      <span>@{user?.social_media?.twitter}</span>
                     </a>
                   )}
                 </div>

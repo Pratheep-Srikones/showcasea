@@ -23,43 +23,41 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [previews, setPreviews] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
-  const uploadPostImage = trpc.image.uploadPostImage.useMutation();
+  const uploadArtWorkImages = trpc.image.uploadArtWorkImages.useMutation();
+  const createArtwork = trpc.artWork.createArtWork.useMutation();
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
+  const [base64Files, setBase64Files] = useState<string[]>([]);
+
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    tags: [] as string[],
+    imageUrls: [] as string[],
+  });
+
   const uploadImages = async () => {
-    if (files.length === 0) return;
-
-    if (files.length > 4) {
-      toastError("You can only upload a maximum of 4 images.");
-      return;
+    if (base64Files.length > 0) {
+      try {
+        const urls = await uploadArtWorkImages.mutateAsync(base64Files);
+        setImageUrls(urls);
+        toastSuccess("Images uploaded successfully!, Submit your artwork");
+      } catch (error) {
+        console.error("Error uploading images:", error);
+        toastError("Failed to upload images. Please try again.");
+      }
     }
-
-    files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        uploadPostImage.mutate(base64String, {
-          onSuccess: (url) => {
-            setImageUrls((prev) => [...prev, url]);
-          },
-          onError: (err) => {
-            toastError("Image upload failed. Please try again.");
-            console.error("Upload failed", err);
-          },
-        });
-      };
-      reader.readAsDataURL(file);
-    });
   };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
-    const newPreviews: string[] = [];
 
     selectedFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (reader.result) {
           setPreviews((prev) => [...prev, reader.result as string]);
+          setBase64Files((prev) => [...prev, reader.result as string]);
         }
       };
       reader.readAsDataURL(file);
@@ -71,6 +69,49 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
   const removeImage = (index: number) => {
     setPreviews((prev) => prev.filter((_, i) => i !== index));
     setFiles((prev) => prev.filter((_, i) => i !== index));
+    setBase64Files((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (formData.title === "" || formData.description === "") {
+      toastError("Please fill in all required fields.");
+      return;
+    }
+
+    // Check if upload was successful
+    if (imageUrls.length === 0) {
+      toastError("Please upload at least one image.");
+      return;
+    }
+
+    // Proceed to submit the artwork
+    createArtwork.mutate(
+      {
+        title: formData.title,
+        description: formData.description,
+        image_urls: imageUrls,
+        tags: formData.tags,
+      },
+      {
+        onSuccess: () => {
+          toastSuccess("Artwork uploaded successfully!");
+          setOpen(false);
+          setPreviews([]);
+          setFiles([]);
+          setImageUrls([]);
+          setFormData({
+            title: "",
+            description: "",
+            tags: [],
+            imageUrls: [],
+          });
+        },
+        onError: (err) => {
+          toastError("Artwork upload failed. Please try again.");
+          console.error("Upload failed", err);
+        },
+      }
+    );
   };
 
   return (
@@ -86,7 +127,15 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" placeholder="Enter artwork title" />
+            <Input
+              id="title"
+              placeholder="Enter artwork title"
+              autoComplete="off"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
@@ -94,11 +143,24 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
               id="description"
               placeholder="Describe your artwork, inspiration, techniques used, etc."
               className="min-h-[100px]"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              autoComplete="off"
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="tags">Tags (comma separated)</Label>
-            <Input id="tags" placeholder="abstract, digital, landscape" />
+            <Input
+              id="tags"
+              placeholder="abstract, digital, landscape"
+              onChange={(e) => {
+                const tags = e.target.value.split(",").map((tag) => tag.trim());
+                setFormData({ ...formData, tags });
+              }}
+              value={formData.tags.join(", ")}
+            />
           </div>
           <div className="grid gap-2">
             <Label>Artwork Images</Label>
@@ -160,17 +222,20 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <DialogFooter>
+          <Button onClick={() => uploadImages()}>
+            <Upload className="mr-2 h-4 w-4" />
+            Upload
+          </Button>
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button
             type="submit"
             onClick={() => {
-              uploadImages();
-              //setOpen(false);
+              handleSubmit();
             }}
           >
-            Upload Artwork
+            Submit Artwork
           </Button>
         </DialogFooter>
       </DialogContent>

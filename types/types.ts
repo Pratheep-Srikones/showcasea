@@ -1,4 +1,4 @@
-export interface User {
+export interface UserType {
   _id: string;
   first_name: string;
   last_name: string;
@@ -7,6 +7,8 @@ export interface User {
   password?: string; // optional or can be omitted in API responses
   createdAt: string;
   updatedAt: string;
+  bio: string;
+  profile_picture_url: string;
   __v: number;
   privacy: {
     profile_visibility: boolean;
@@ -20,5 +22,10 @@ export interface User {
     follows: boolean;
     messages: boolean;
     marketing: boolean;
+  };
+  social_media: {
+    website: string;
+    twitter: string;
+    instagram: string;
   };
 }
