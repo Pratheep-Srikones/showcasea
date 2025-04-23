@@ -17,3 +17,21 @@ export const uploadPostImage = async (file: string) => {
     folder: "posts",
   });
 };
+
+export const extractPublicId = (secureUrl: string): string | null => {
+  try {
+    // Example input:
+    // https://res.cloudinary.com/du9frz9rv/image/upload/v1745341315/profiles/i5r7jnbd0pooc8ne67tc.png
+
+    const url = new URL(secureUrl);
+    const parts = url.pathname.split("/"); // ['/', 'image', 'upload', 'v123456789', 'profiles', 'i5r7jnbd0pooc8ne67tc.png']
+    const folder = parts[parts.length - 2]; // 'profiles'
+    const filenameWithExt = parts[parts.length - 1]; // 'i5r7jnbd0pooc8ne67tc.png'
+
+    const filename = filenameWithExt.replace(/\.[^/.]+$/, ""); // remove file extension
+    return `${folder}/${filename}`; // 'profiles/i5r7jnbd0pooc8ne67tc'
+  } catch (error) {
+    console.error("Invalid URL:", error);
+    return null;
+  }
+};

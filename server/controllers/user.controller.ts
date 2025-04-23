@@ -81,7 +81,18 @@ export const loginUser = async ({
     user: user,
   };
 };
-
+export const logoutUser = async () => {
+  console.log("logging out...");
+  (await cookies()).set("token", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  });
+  return {
+    message: "Logout successful",
+  };
+};
 export const getUserById = async (id: string) => {
   if (!id) {
     throw new TRPCError({

@@ -17,11 +17,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
+import { trpc } from "@/lib/trpc/client";
+import { toastError, toastSuccess } from "@/lib/helpers/toast";
 
 export function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   //const isLoggedIn = pathname !== "/" && pathname !== "/auth";
+  const logoutMutation = trpc.user.logout.useMutation();
+
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        toastSuccess("Logout successful");
+        logout(router);
+      },
+      onError: (error) => {
+        toastError("Logout Failed");
+        console.error("Logout failed", error);
+      },
+    });
+  };
+
+  const isLoggingOut = logoutMutation.isPending;
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -109,9 +127,12 @@ export function Navbar() {
                 <DropdownMenuItem>
                   <button
                     className="text-red-600"
-                    onClick={() => logout(router)}
+                    onClick={() => {
+                      handleLogout();
+                    }}
+                    disabled={isLoggingOut}
                   >
-                    Log Out
+                    {isLoggingOut ? "Logging Out..." : "Log Out"}
                   </button>
                 </DropdownMenuItem>
               </DropdownMenuContent>

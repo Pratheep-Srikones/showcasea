@@ -1,6 +1,10 @@
 import { protectedProcedure, publicProcedure, router } from "@/lib/trpc/server";
 import { z } from "zod";
-import { loginUser, signupUser } from "../controllers/user.controller";
+import {
+  loginUser,
+  logoutUser,
+  signupUser,
+} from "../controllers/user.controller";
 
 export const userRouter = router({
   signUp: publicProcedure
@@ -34,5 +38,9 @@ export const userRouter = router({
   getMe: protectedProcedure.query(({ ctx }) => {
     console.log(ctx.user);
     return ctx.user;
+  }),
+
+  logout: publicProcedure.mutation(() => {
+    logoutUser();
   }),
 });
