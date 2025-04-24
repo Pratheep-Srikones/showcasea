@@ -47,13 +47,13 @@ export function Navbar() {
     { name: "About", href: "/about" },
   ];
 
+  const { isAuthenticated, logout, user } = useAuthStore();
+
   const userNavItems = [
     { name: "Dashboard", href: "/dashboard" },
-    { name: "Profile", href: "/profile" },
+    { name: "Profile", href: `/profile/${user?._id} ` },
     { name: "Account", href: "/account" },
   ];
-
-  const { isAuthenticated, logout, user } = useAuthStore();
   const router = useRouter();
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

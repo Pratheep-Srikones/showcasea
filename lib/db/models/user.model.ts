@@ -28,6 +28,9 @@ const UserSchema = new Schema(
       messages: { type: Boolean, default: true },
       marketing: { type: Boolean, default: true },
     },
+    followerCount: { type: Number, default: 0 },
+    followingCount: { type: Number, default: 0 },
+    totalLikes: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

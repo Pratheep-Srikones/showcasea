@@ -11,6 +11,10 @@ const ArtWorkSchema = new Schema(
     },
     image_urls: [{ type: String, required: true }],
     tags: [{ type: String }],
+    likeCount: { type: Number, default: 0 },
+    commentCount: { type: Number, default: 0 },
+    viewCount: { type: Number, default: 0 },
+    isPublic: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

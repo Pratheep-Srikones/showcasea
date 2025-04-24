@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "@/lib/trpc/server";
 import { z } from "zod";
 import {
+  getUserById,
   loginUser,
   logoutUser,
   signupUser,
@@ -43,4 +44,11 @@ export const userRouter = router({
   logout: publicProcedure.mutation(() => {
     logoutUser();
   }),
+
+  getUserById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      console.log("Input data:", input);
+      return await getUserById(input.id);
+    }),
 });

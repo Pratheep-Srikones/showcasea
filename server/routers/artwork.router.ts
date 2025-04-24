@@ -1,6 +1,9 @@
 import { protectedProcedure, publicProcedure, router } from "@/lib/trpc/server";
 import { z } from "zod";
-import { createArtwork } from "../controllers/artwork.controller";
+import {
+  createArtwork,
+  getArtWorksByArtistId,
+} from "../controllers/artwork.controller";
 export const artWorkRouter = router({
   createArtWork: protectedProcedure
     .input(
@@ -16,5 +19,11 @@ export const artWorkRouter = router({
         ...input,
         artistId: ctx.user._id,
       });
+    }),
+
+  getArtWorksByArtistId: protectedProcedure
+    .input(z.string())
+    .query(async ({ input, ctx }) => {
+      return await getArtWorksByArtistId(input);
     }),
 });

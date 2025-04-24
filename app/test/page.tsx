@@ -1,24 +1,24 @@
-// components/UserInfo.tsx
 "use client";
 
 import { trpc } from "@/lib/trpc/client";
+import { ArtworkType } from "@/types/types";
 import { useEffect, useState } from "react";
 
 const UserInfo = () => {
-  const { data: user, isLoading, error } = trpc.user.getMe.useQuery();
+  const { data: user, isPending, error } = trpc.user.getMe.useQuery();
+  const { data: artWorks, isPending: isGettingArt } =
+    trpc.artWork.getArtWorksByArtistId.useQuery(user?._id || "");
+
   const upload = trpc.image.uploadProfileImage.useMutation();
   const [pic, setPic] = useState<File | null>(null);
+
   useEffect(() => {
     if (error) {
       console.error("Auth error:", error.message);
     }
   }, [error]);
 
-  if (isLoading) return <p>Loading...</p>;
-
-  if (!user) return <p>You are not logged in</p>;
-
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!pic) return;
 
     const reader = new FileReader();
@@ -27,15 +27,17 @@ const UserInfo = () => {
       upload.mutate(base64String, {
         onSuccess: (url) => {
           console.log("Image uploaded:", url);
-          // Optionally update user state or show success toast
         },
         onError: (err) => {
           console.error("Upload failed", err);
         },
       });
     };
-    reader.readAsDataURL(pic); // Read image as base64 string
+    reader.readAsDataURL(pic);
   };
+
+  if (isPending) return <p>Loading...</p>;
+  if (!user) return <p>You are not logged in</p>;
 
   return (
     <div>
@@ -47,15 +49,25 @@ const UserInfo = () => {
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => {
-            if (e.target.files && e.target.files[0]) {
-              setPic(e.target.files[0]);
-            } else {
-              setPic(null);
-            }
-          }}
+          onChange={(e) => setPic(e.target.files?.[0] ?? null)}
         />
-        <button onClick={() => handleUpload()}>Upload</button>
+        <button onClick={handleUpload}>Upload</button>
+
+        {artWorks && artWorks?.length > 0 && (
+          <div>
+            {artWorks?.map((artWork) => (
+              <div key={artWork._id}>
+                <h2>{artWork.title}</h2>
+                <p>{artWork.description}</p>
+                <img
+                  src={artWork.image_urls[0]}
+                  alt={artWork.title}
+                  style={{ width: "200px" }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

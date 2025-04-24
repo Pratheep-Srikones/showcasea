@@ -28,4 +28,23 @@ export interface UserType {
     twitter: string;
     instagram: string;
   };
+  followerCount: number;
+  followingCount: number;
+  totalLikes: number;
+}
+
+export interface ArtworkType {
+  _id: string;
+  title: string;
+  description: string;
+  image_urls: string[];
+  tags: string[];
+  artist: UserType; // Assuming artist is of type UserType
+  createdAt: string;
+  updatedAt: string;
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
+  isPublic: boolean;
+  __v: number;
 }

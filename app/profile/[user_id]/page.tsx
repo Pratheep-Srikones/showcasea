@@ -15,96 +15,38 @@ import {
   Twitter,
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
-
-// Dummy data for user profile
-const userProfile = {
-  name: "Elena Rodriguez",
-  username: "elenaart",
-  avatar: "/placeholder.svg?height=150&width=150",
-  coverImage: "/placeholder.svg?height=400&width=1200",
-  bio: "Digital artist and illustrator specializing in vibrant, surreal landscapes and character design. Based in Barcelona, Spain.",
-  followers: 1245,
-  following: 328,
-  likes: 8976,
-  links: {
-    website: "https://elenaart.com",
-    instagram: "elenaart",
-    twitter: "elenaart",
-  },
-  artworks: [
-    {
-      id: 1,
-      title: "Neon Dreams",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 245,
-      comments: 32,
-      views: 1890,
-    },
-    {
-      id: 2,
-      title: "Digital Flora",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 189,
-      comments: 24,
-      views: 1456,
-    },
-    {
-      id: 3,
-      title: "Abstract Emotions",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 312,
-      comments: 45,
-      views: 2134,
-    },
-    {
-      id: 4,
-      title: "Urban Geometry",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 178,
-      comments: 19,
-      views: 1245,
-    },
-    {
-      id: 5,
-      title: "Sunset Reflections",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 203,
-      comments: 27,
-      views: 1567,
-    },
-    {
-      id: 6,
-      title: "Geometric Harmony",
-      image: "/placeholder.svg?height=400&width=600",
-      likes: 156,
-      comments: 21,
-      views: 1234,
-    },
-  ],
-  collections: [
-    {
-      id: 1,
-      title: "Abstract Works",
-      image: "/placeholder.svg?height=400&width=600",
-      count: 12,
-    },
-    {
-      id: 2,
-      title: "Character Designs",
-      image: "/placeholder.svg?height=400&width=600",
-      count: 8,
-    },
-    {
-      id: 3,
-      title: "Landscapes",
-      image: "/placeholder.svg?height=400&width=600",
-      count: 15,
-    },
-  ],
-};
+import { useParams, useRouter } from "next/navigation";
+import { ArtworkType, UserType } from "@/types/types";
+import { trpc } from "@/lib/trpc/client";
+import { useArtStore } from "@/store/useArtStore";
 
 export default function UserProfilePage() {
+  const router = useRouter();
+
+  const { setSelectedArtWork } = useArtStore();
+  const params = useParams();
+  const { user_id } = params;
   const { user } = useAuthStore();
+
+  const isMyPage = user_id === user?._id;
+
+  const { data: userProfileData, isLoading: isUserProfileLoading } =
+    trpc.user.getUserById.useQuery({ id: user_id as string });
+
+  const { data: userArtworksData, isLoading: isUserArtworksLoading } =
+    trpc.artWork.getArtWorksByArtistId.useQuery(user_id as string);
+
+  const userArtWorks = (userArtworksData as ArtworkType[]) || [];
+  if (isUserProfileLoading || isUserArtworksLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="flex items-center justify-center space-x-2">
+          <div className="w-6 h-6 rounded-full border-4 border-t-transparent border-purple-600 animate-spin"></div>
+          <p className="text-muted-foreground text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="flex flex-col min-h-screen">
       {/* Cover Image */}
@@ -124,24 +66,26 @@ export default function UserProfilePage() {
           <div className="flex flex-col items-center md:flex-row md:items-end gap-4">
             <Avatar className="h-32 w-32 border-4 border-background">
               <AvatarImage
-                src={user?.profile_picture_url}
-                alt={user?.username}
+                src={userProfileData?.profile_picture_url}
+                alt={userProfileData?.username}
               />
               <AvatarFallback className="text-5xl font-bold">
-                {user?.first_name[0].toUpperCase()}
-                {user?.last_name[0].toUpperCase()}
+                {userProfileData?.first_name[0].toUpperCase()}
+                {userProfileData?.last_name[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="mt-4 md:mt-0 text-center md:text-left">
               <h1 className="text-2xl md:text-3xl font-bold">
-                {user?.first_name} {user?.last_name}
+                {userProfileData?.first_name} {userProfileData?.last_name}
               </h1>
-              <p className="text-muted-foreground">@{user?.username}</p>
+              <p className="text-muted-foreground">
+                @{userProfileData?.username}
+              </p>
             </div>
           </div>
           <div className="mt-4 md:mt-0 flex gap-2">
-            <Button>Follow</Button>
-            <Button variant="outline">
+            <Button className={`${isMyPage ? "hidden" : ""}`}>Follow</Button>
+            <Button variant="outline" className={`${isMyPage ? "hidden" : ""}`}>
               <Mail className="mr-2 h-4 w-4" />
               Message
             </Button>
@@ -155,41 +99,41 @@ export default function UserProfilePage() {
               <div className="p-6">
                 <h3 className="font-medium">About</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {user?.bio || "No bio available."}
+                  {userProfileData?.bio || "No bio available."}
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2">
-                  {user?.social_media?.website && (
+                  {userProfileData?.social_media?.website && (
                     <a
-                      href={user?.social_media?.website}
+                      href={userProfileData?.social_media?.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <LinkIcon className="h-4 w-4" />
-                      <span>{user?.social_media?.website}</span>
+                      <span>{userProfileData?.social_media?.website}</span>
                     </a>
                   )}
-                  {user?.social_media?.instagram && (
+                  {userProfileData?.social_media?.instagram && (
                     <a
-                      href={`https://instagram.com/${user?.social_media?.instagram}`}
+                      href={`https://instagram.com/${userProfileData?.social_media?.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <Instagram className="h-4 w-4" />
-                      <span>@{user?.social_media?.instagram}</span>
+                      <span>@{userProfileData?.social_media?.instagram}</span>
                     </a>
                   )}
-                  {user?.social_media?.twitter && (
+                  {userProfileData?.social_media?.twitter && (
                     <a
-                      href={`https://twitter.com/${user?.social_media?.twitter}`}
+                      href={`https://twitter.com/${userProfileData?.social_media?.twitter}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <Twitter className="h-4 w-4" />
-                      <span>@{user?.social_media?.twitter}</span>
+                      <span>@{userProfileData?.social_media?.twitter}</span>
                     </a>
                   )}
                 </div>
@@ -198,18 +142,20 @@ export default function UserProfilePage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold">
-                      {userProfile.followers}
+                      {userProfileData?.followerCount || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">Followers</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold">
-                      {userProfile.following}
+                      {userProfileData?.followingCount || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">Following</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{userProfile.likes}</p>
+                    <p className="text-2xl font-bold">
+                      {userProfileData?.totalLikes || 0}
+                    </p>
                     <p className="text-xs text-muted-foreground">Likes</p>
                   </div>
                 </div>
@@ -222,18 +168,20 @@ export default function UserProfilePage() {
             <Tabs defaultValue="artworks">
               <TabsList>
                 <TabsTrigger value="artworks">Artworks</TabsTrigger>
-                <TabsTrigger value="collections">Collections</TabsTrigger>
                 <TabsTrigger value="liked">Liked</TabsTrigger>
               </TabsList>
               <TabsContent value="artworks" className="mt-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {userProfile.artworks.map((artwork) => (
-                    <Card key={artwork.id} className="overflow-hidden">
+                  {userArtWorks.map((artwork) => (
+                    <Card key={artwork._id} className="overflow-hidden">
                       <CardContent className="p-0">
-                        <Link href={`/artwork/${artwork.id}`}>
+                        <Link
+                          onClick={() => setSelectedArtWork(artwork)}
+                          href={`/artwork`}
+                        >
                           <div className="relative aspect-[4/3] w-full overflow-hidden">
                             <Image
-                              src={artwork.image || "/placeholder.svg"}
+                              src={artwork.image_urls[0] || "/placeholder.svg"}
                               alt={artwork.title}
                               width={600}
                               height={400}
@@ -243,7 +191,8 @@ export default function UserProfilePage() {
                         </Link>
                         <div className="p-4">
                           <Link
-                            href={`/artwork/${artwork.id}`}
+                            onClick={() => setSelectedArtWork(artwork)}
+                            href={`/artwork`}
                             className="font-medium hover:underline"
                           >
                             {artwork.title}
@@ -254,52 +203,18 @@ export default function UserProfilePage() {
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Heart className="h-4 w-4" />
-                            <span>{artwork.likes}</span>
+                            <span>{artwork.likeCount || 0}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <MessageSquare className="h-4 w-4" />
-                            <span>{artwork.comments}</span>
+                            <span>{artwork.commentCount || 0}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Eye className="h-4 w-4" />
-                            <span>{artwork.views}</span>
+                            <span>{artwork.viewCount || 0}</span>
                           </div>
                         </div>
                       </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="collections" className="mt-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {userProfile.collections.map((collection) => (
-                    <Card key={collection.id} className="overflow-hidden">
-                      <CardContent className="p-0">
-                        <Link href={`/collection/${collection.id}`}>
-                          <div className="relative aspect-[4/3] w-full overflow-hidden">
-                            <Image
-                              src={collection.image || "/placeholder.svg"}
-                              alt={collection.title}
-                              width={600}
-                              height={400}
-                              className="object-cover transition-transform hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <span className="text-white text-xl font-bold">
-                                {collection.count} artworks
-                              </span>
-                            </div>
-                          </div>
-                        </Link>
-                        <div className="p-4">
-                          <Link
-                            href={`/collection/${collection.id}`}
-                            className="font-medium hover:underline"
-                          >
-                            {collection.title}
-                          </Link>
-                        </div>
-                      </CardContent>
                     </Card>
                   ))}
                 </div>
