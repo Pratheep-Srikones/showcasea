@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   createArtwork,
   getArtWorksByArtistId,
+  increaseViewCount,
 } from "../controllers/artwork.controller";
 export const artWorkRouter = router({
   createArtWork: protectedProcedure
@@ -25,5 +26,11 @@ export const artWorkRouter = router({
     .input(z.string())
     .query(async ({ input, ctx }) => {
       return await getArtWorksByArtistId(input);
+    }),
+
+  increaseViewCount: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ input }) => {
+      return await increaseViewCount(input);
     }),
 });
