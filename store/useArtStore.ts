@@ -6,6 +6,7 @@ interface ArtState {
   setSelectedArtWork: (artwork: ArtworkType | null) => void;
   changeLikeCount: (change: number) => void;
   changeCommentCount: (change: number) => void;
+  increaseViewCount: () => void;
 }
 
 export const useArtStore = create<ArtState>()(
@@ -17,10 +18,14 @@ export const useArtStore = create<ArtState>()(
       changeLikeCount: (change: number) =>
         set((state) => {
           if (state.seletedArtWork) {
+            const newLikeCount = Math.max(
+              0,
+              state.seletedArtWork.likeCount + change
+            );
             return {
               seletedArtWork: {
                 ...state.seletedArtWork,
-                likeCount: state.seletedArtWork.likeCount + change,
+                likeCount: newLikeCount,
               },
             };
           }
@@ -29,15 +34,32 @@ export const useArtStore = create<ArtState>()(
       changeCommentCount: (change: number) =>
         set((state) => {
           if (state.seletedArtWork) {
+            const newCommentCount = Math.max(
+              0,
+              state.seletedArtWork.commentCount + change
+            );
             return {
               seletedArtWork: {
                 ...state.seletedArtWork,
-                commentCount: state.seletedArtWork.commentCount + change,
+                commentCount: newCommentCount,
               },
             };
           }
           return state;
         }),
+      increaseViewCount: () => {
+        set((state) => {
+          if (state.seletedArtWork) {
+            return {
+              seletedArtWork: {
+                ...state.seletedArtWork,
+                viewCount: state.seletedArtWork.viewCount + 1,
+              },
+            };
+          }
+          return state;
+        });
+      },
     }),
     {
       name: "art-storage", // name of the item in storage

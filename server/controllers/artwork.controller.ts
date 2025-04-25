@@ -36,3 +36,24 @@ export const getArtWorksByArtistId = async (artistId: string) => {
 
   return artworks;
 };
+
+export const increaseViewCount = async (artworkId: string) => {
+  try {
+    const artwork = await ArtWork.findByIdAndUpdate(
+      artworkId,
+      { $inc: { viewCount: 1 } },
+      { new: true }
+    );
+    if (!artwork) {
+      console.error("Artwork not found");
+      return null;
+    }
+
+    return {
+      message: "View count increased successfully",
+    };
+  } catch (error) {
+    console.error("Error updating artwork view count:", error);
+    throw error;
+  }
+};

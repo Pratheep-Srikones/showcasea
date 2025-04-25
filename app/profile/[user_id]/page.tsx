@@ -23,7 +23,9 @@ import { useArtStore } from "@/store/useArtStore";
 export default function UserProfilePage() {
   const router = useRouter();
 
-  const { setSelectedArtWork } = useArtStore();
+  const { setSelectedArtWork, increaseViewCount } = useArtStore();
+  const increaseViewCountMutation =
+    trpc.artWork.increaseViewCount.useMutation();
   const params = useParams();
   const { user_id } = params;
   const { user } = useAuthStore();
@@ -47,6 +49,7 @@ export default function UserProfilePage() {
       </div>
     );
   }
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Cover Image */}
@@ -176,7 +179,14 @@ export default function UserProfilePage() {
                     <Card key={artwork._id} className="overflow-hidden">
                       <CardContent className="p-0">
                         <Link
-                          onClick={() => setSelectedArtWork(artwork)}
+                          onClick={() => {
+                            setSelectedArtWork(artwork);
+                            increaseViewCountMutation.mutate(artwork._id, {
+                              onSuccess: () => {
+                                increaseViewCount();
+                              },
+                            });
+                          }}
                           href={`/artwork`}
                         >
                           <div className="relative aspect-[4/3] w-full overflow-hidden">
@@ -191,7 +201,14 @@ export default function UserProfilePage() {
                         </Link>
                         <div className="p-4">
                           <Link
-                            onClick={() => setSelectedArtWork(artwork)}
+                            onClick={() => {
+                              setSelectedArtWork(artwork);
+                              increaseViewCountMutation.mutate(artwork._id, {
+                                onSuccess: () => {
+                                  increaseViewCount();
+                                },
+                              });
+                            }}
                             href={`/artwork`}
                             className="font-medium hover:underline"
                           >
