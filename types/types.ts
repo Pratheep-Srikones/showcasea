@@ -48,3 +48,13 @@ export interface ArtworkType {
   isPublic: boolean;
   __v: number;
 }
+
+export interface CommentType {
+  _id: string;
+  artWorkId: string;
+  userId: UserType; // Assuming this is a reference to the UserType
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}

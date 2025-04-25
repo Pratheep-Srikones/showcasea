@@ -7,18 +7,14 @@ const CommentSchema = new Schema(
       ref: "User",
       required: true,
     },
-    postId: {
+    artWorkId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Artwork",
+      ref: "ArtWork",
       required: true,
     },
     content: {
       type: String,
       required: true,
-    },
-    parentCommentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Comment",
     },
   },
   { timestamps: true }
