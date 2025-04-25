@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Heart, MessageSquare, Eye, ArrowLeft } from "lucide-react";
 import { useArtStore } from "@/store/useArtStore";
 import { useRouter } from "next/navigation";
+import { trpc } from "@/lib/trpc/client";
 
 export default function ArtworkDetailPage() {
   const router = useRouter();
@@ -19,6 +20,19 @@ export default function ArtworkDetailPage() {
   const [selectedImage, setSelectedImage] = useState(
     seletedArtWork?.image_urls[0]
   );
+  const likeMutation = trpc.like.likeArtWork.useMutation();
+  const unlikeMutation = trpc.like.unlikeArtWork.useMutation();
+  const { data: hasLikedData, isPending } = trpc.like.hasLiked.useQuery({
+    liker_id: seletedArtWork?.artist?._id!,
+    artWork_id: seletedArtWork?._id!,
+  });
+  const [hasLiked, setHasLiked] = useState(false);
+
+  useEffect(() => {
+    if (hasLikedData !== undefined) {
+      setHasLiked(hasLikedData);
+    }
+  }, [hasLikedData]);
 
   const dummyComments = [
     {
@@ -40,7 +54,36 @@ export default function ArtworkDetailPage() {
       createdAt: "2025-04-20T14:45:00.000Z",
     },
   ];
-
+  const handleLike = (artWork_id: string, artist_id: string) => {
+    likeMutation.mutate(
+      { artWork_id, artist_id },
+      {
+        onSuccess: (data) => {
+          if (data) {
+            setHasLiked(true);
+          }
+        },
+        onError: (error) => {
+          console.error("Error liking artwork:", error);
+        },
+      }
+    );
+  };
+  const handleUnlike = (artWork_id: string, artist_id: string) => {
+    unlikeMutation.mutate(
+      { artWork_id, artist_id },
+      {
+        onSuccess: (data) => {
+          if (data) {
+            setHasLiked(false);
+          }
+        },
+        onError: (error) => {
+          console.error("Error unliking artwork:", error);
+        },
+      }
+    );
+  };
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <div
@@ -116,9 +159,31 @@ export default function ArtworkDetailPage() {
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Heart /> Like
+          <Button
+            variant={hasLiked ? "default" : "outline"}
+            className={`flex items-center gap-2 transition-colors duration-200 ${
+              hasLiked
+                ? "text-red-600 dark:text-red-400 border-red-600 dark:border-red-400"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+            aria-pressed={hasLiked}
+            onClick={() =>
+              hasLiked
+                ? handleUnlike(
+                    seletedArtWork?._id!,
+                    seletedArtWork?.artist?._id!
+                  )
+                : handleLike(seletedArtWork?._id!, seletedArtWork?.artist?._id!)
+            }
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${
+                hasLiked ? "fill-current text-red-600 dark:text-red-400" : ""
+              }`}
+            />
+            {hasLiked ? "Liked" : "Like"}
           </Button>
+
           <Button variant="outline" className="flex items-center gap-2">
             <MessageSquare /> Comment
           </Button>
