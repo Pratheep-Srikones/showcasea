@@ -81,16 +81,7 @@ export function Navbar() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden md:flex relative w-full max-w-[200px]">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-md border border-input bg-background pl-8 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            />
-          </div>
-
+        <div className="flex items-center gap-4">
           <ThemeToggle />
 
           {isAuthenticated ? (
@@ -103,8 +94,8 @@ export function Navbar() {
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.profile_picture_url} alt="@user" />
                     <AvatarFallback>
-                      {user?.first_name[0].toUpperCase()}
-                      {user?.last_name[0].toUpperCase()}
+                      {user?.first_name[0]?.toUpperCase()}
+                      {user?.last_name[0]?.toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>

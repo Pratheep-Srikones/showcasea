@@ -10,9 +10,9 @@ export const imageRouter = router({
   uploadProfileImage: protectedProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
-      const uploadRes = await uploadProfileImage(input);
-      console.log(uploadRes);
-      return uploadRes.secure_url;
+      const upload_url = await uploadProfileImage(input, ctx.user._id);
+      console.log(upload_url);
+      return upload_url;
     }),
   uploadPostImage: protectedProcedure
     .input(z.string())

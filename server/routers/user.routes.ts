@@ -6,6 +6,12 @@ import {
   loginUser,
   logoutUser,
   signupUser,
+  updateNotifications,
+  updatePassword,
+  updatePrivacy,
+  updateUserDetails,
+  updateUserPicture,
+  updateUserSocialMedia,
 } from "../controllers/user.controller";
 
 export const userRouter = router({
@@ -56,4 +62,104 @@ export const userRouter = router({
   getCountsData: protectedProcedure.query(async ({ ctx }) => {
     return await getTotalCountsForUser(ctx.user._id);
   }),
+
+  updateProfilePic: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      console.log("Router called");
+      console.log("Input data:");
+      const result = await updateUserPicture(ctx.user._id, input);
+
+      return result;
+    }),
+
+  updateDetails: protectedProcedure
+    .input(
+      z.object({
+        first_name: z.string(),
+        last_name: z.string(),
+        bio: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await updateUserDetails(
+        ctx.user._id,
+        input.first_name,
+        input.last_name,
+        input.bio
+      );
+    }),
+
+  updateSocialMedia: protectedProcedure
+    .input(
+      z.object({
+        website: z.string(),
+        twitter: z.string(),
+        instagram: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await updateUserSocialMedia(
+        ctx.user._id,
+        input.website,
+        input.twitter,
+        input.instagram
+      );
+    }),
+
+  changePassword: protectedProcedure
+    .input(
+      z.object({
+        oldPassword: z.string(),
+        newPassword: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await updatePassword(
+        ctx.user._id,
+        input.oldPassword,
+        input.newPassword
+      );
+    }),
+
+  updateNotifications: protectedProcedure
+    .input(
+      z.object({
+        comments: z.boolean(),
+        likes: z.boolean(),
+        follows: z.boolean(),
+        messages: z.boolean(),
+        marketing: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await updateNotifications(
+        ctx.user._id,
+        input.comments,
+        input.likes,
+        input.follows,
+        input.messages,
+        input.marketing
+      );
+    }),
+
+  updatePrivacy: protectedProcedure
+
+    .input(
+      z.object({
+        profile_visibility: z.boolean(),
+        search_visibility: z.boolean(),
+        comments: z.boolean(),
+        data_collection: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await updatePrivacy(
+        ctx.user._id,
+        input.profile_visibility,
+        input.search_visibility,
+        input.comments,
+        input.data_collection
+      );
+    }),
 });

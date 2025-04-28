@@ -7,10 +7,24 @@ cloudinary.config({
   api_secret: process.env.CLOUD_SECRET,
 });
 
-export const uploadProfileImage = async (file: string) => {
-  return await cloudinary.uploader.upload(file, {
+export const uploadProfileImage = async (file: string, userId: string) => {
+  console.log("Checking for existing profile image...");
+  try {
+    const publicId = `profiles/${userId}`;
+    await cloudinary.uploader.destroy(publicId);
+    console.log("Previous image deleted successfully.");
+  } catch (error) {
+    console.log("No previous image found or failed to delete:", error);
+  }
+
+  console.log("Uploading profile image to Cloudinary...");
+  const result = await cloudinary.uploader.upload(file, {
+    public_id: userId,
+    overwrite: true,
+    resource_type: "image",
     folder: "profiles",
   });
+  return result.secure_url;
 };
 
 export const uploadPostImage = async (file: string) => {
