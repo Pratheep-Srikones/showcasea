@@ -28,11 +28,13 @@ export const createArtwork = async ({
 };
 
 export const getArtWorksByArtistId = async (artistId: string) => {
-  const artworks = await ArtWork.find({ artist: artistId }).populate("artist", {
-    first_name: 1,
-    last_name: 1,
-    profile_picture_url: 1,
-  });
+  const artworks = await ArtWork.find({ artist: artistId })
+    .populate("artist", {
+      first_name: 1,
+      last_name: 1,
+      profile_picture_url: 1,
+    })
+    .sort({ createdAt: -1 });
 
   return artworks;
 };

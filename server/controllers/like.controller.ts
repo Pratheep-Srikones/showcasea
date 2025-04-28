@@ -31,11 +31,6 @@ export const likeArtWork = async (
       { $inc: { likeCount: 1 } },
       { session }
     );
-    await User.findByIdAndUpdate(
-      artist_id,
-      { $inc: { totalLikes: 1 } },
-      { session }
-    );
     await session.commitTransaction();
     return {
       message: "Artwork liked successfully",

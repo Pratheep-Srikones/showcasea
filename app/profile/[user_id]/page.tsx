@@ -142,7 +142,7 @@ export default function UserProfilePage() {
                 </div>
               </div>
               <div className="border-t p-6">
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold">
                       {userProfileData?.followerCount || 0}
@@ -154,12 +154,6 @@ export default function UserProfilePage() {
                       {userProfileData?.followingCount || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">Following</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {userProfileData?.totalLikes || 0}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Likes</p>
                   </div>
                 </div>
               </div>

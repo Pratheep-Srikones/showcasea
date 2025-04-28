@@ -33,14 +33,11 @@ export function DashboardSidebar() {
 
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "My Artworks", href: "/dashboard/artworks", icon: ImageIcon },
-    { name: "Likes", href: "/dashboard/likes", icon: Heart },
-    { name: "Comments", href: "/dashboard/comments", icon: MessageSquare },
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
     { name: "Settings", href: "/account", icon: Settings },
   ];
 
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const router = useRouter();
 
   return (
@@ -87,13 +84,18 @@ export function DashboardSidebar() {
             <div className="px-3 py-2">
               <div className="flex items-center gap-3 rounded-md px-3 py-2">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="/placeholder-user.jpg" alt="@user" />
-                  <AvatarFallback>AC</AvatarFallback>
+                  <AvatarImage src={user?.profile_picture_url} alt="@user" />
+                  <AvatarFallback>
+                    {user?.first_name?.charAt(0).toUpperCase()}
+                    {user?.last_name?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium">Alex Chen</span>
+                  <span className="text-sm font-medium">
+                    {user?.first_name} {user?.last_name}
+                  </span>
                   <span className="text-xs text-muted-foreground">
-                    alex@showcasa.com
+                    {user?.email}
                   </span>
                 </div>
               </div>

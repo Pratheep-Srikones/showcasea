@@ -30,6 +30,9 @@ export default function DashboardPage() {
   const { data: userArtworksData, isLoading: isUserArtworksLoading } =
     trpc.artWork.getArtWorksByArtistId.useQuery(user?._id as string);
 
+  const { data: userCountsData, isPending: isCountDataPending } =
+    trpc.user.getCountsData.useQuery();
+
   const userArtWorks = (userArtworksData as ArtworkType[]) || [];
   return (
     <div className="flex min-h-screen">
@@ -61,7 +64,17 @@ export default function DashboardPage() {
                 <Eye className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">4,337</div>
+                <div className="text-2xl font-bold">
+                  {isCountDataPending ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="h-6 w-10 rounded-md bg-muted animate-pulse" />
+                      {/* Optional: loading text, smaller and muted */}
+                      {/* <p className="text-muted-foreground text-sm">Loading...</p> */}
+                    </div>
+                  ) : (
+                    userCountsData?.totalViews
+                  )}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -72,7 +85,17 @@ export default function DashboardPage() {
                 <Heart className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">447</div>
+                <div className="text-2xl font-bold">
+                  {isCountDataPending ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="h-6 w-10 rounded-md bg-muted animate-pulse" />
+                      {/* Optional: loading text, smaller and muted */}
+                      {/* <p className="text-muted-foreground text-sm">Loading...</p> */}
+                    </div>
+                  ) : (
+                    userCountsData?.totalLikes
+                  )}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -83,7 +106,17 @@ export default function DashboardPage() {
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">63</div>
+                <div className="text-2xl font-bold">
+                  {isCountDataPending ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="h-6 w-10 rounded-md bg-muted animate-pulse" />
+                      {/* Optional: loading text, smaller and muted */}
+                      {/* <p className="text-muted-foreground text-sm">Loading...</p> */}
+                    </div>
+                  ) : (
+                    userCountsData?.totalComments
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

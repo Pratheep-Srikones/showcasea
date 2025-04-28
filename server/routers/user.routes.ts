@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "@/lib/trpc/server";
 import { z } from "zod";
 import {
+  getTotalCountsForUser,
   getUserById,
   loginUser,
   logoutUser,
@@ -51,4 +52,8 @@ export const userRouter = router({
       console.log("Input data:", input);
       return await getUserById(input.id);
     }),
+
+  getCountsData: protectedProcedure.query(async ({ ctx }) => {
+    return await getTotalCountsForUser(ctx.user._id);
+  }),
 });

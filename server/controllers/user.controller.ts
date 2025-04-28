@@ -1,3 +1,4 @@
+import { ArtWork } from "@/lib/db/models/artwork.model";
 import { User } from "@/lib/db/models/user.model";
 import { generateToken } from "@/lib/helpers/jwt";
 import { comparePassword, hashPassword } from "@/lib/helpers/password";
@@ -109,4 +110,43 @@ export const getUserById = async (id: string) => {
   }
 
   return user;
+};
+
+export const getTotalCountsForUser = async (userId: string) => {
+  if (!userId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "User ID is required",
+    });
+  }
+
+  let counts = { totalLikes: 0, totalComments: 0, totalViews: 0 };
+
+  try {
+    const result = await ArtWork.aggregate([
+      { $match: { artist: userId } },
+      {
+        $group: {
+          _id: null,
+          totalLikes: { $sum: { $ifNull: ["$likeCount", 0] } },
+          totalComments: { $sum: { $ifNull: ["$commentCount", 0] } },
+          totalViews: { $sum: { $ifNull: ["$viewCount", 0] } },
+        },
+      },
+    ]);
+
+    counts = {
+      totalLikes: result[0]?.totalLikes || 0,
+      totalComments: result[0]?.totalComments || 0,
+      totalViews: result[0]?.totalViews || 0,
+    };
+  } catch (error) {
+    console.error("Error fetching user counts:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Error fetching user counts",
+    });
+  }
+
+  return counts;
 };
