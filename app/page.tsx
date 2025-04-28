@@ -1,10 +1,13 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Brush, Eye, Users } from "lucide-react";
 import { ArtistCarousel } from "@/components/artist-carousel";
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function Home() {
+  const { isAuthenticated } = useAuthStore();
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -23,7 +26,11 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                <Button asChild size="lg">
+                <Button
+                  asChild
+                  size="lg"
+                  className={isAuthenticated ? "hidden" : ""}
+                >
                   <Link href="/auth?tab=signup">Join Now</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>

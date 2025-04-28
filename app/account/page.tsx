@@ -340,6 +340,7 @@ export default function AccountPage() {
                                 first_name: e.target.value,
                               });
                             }}
+                            autoComplete="off"
                           />
                         </div>
                         <div className="space-y-2">
@@ -353,6 +354,7 @@ export default function AccountPage() {
                                 last_name: e.target.value,
                               });
                             }}
+                            autoComplete="off"
                           />
                         </div>
                       </div>
@@ -386,6 +388,7 @@ export default function AccountPage() {
                           }}
                           placeholder="Tell us about yourself"
                           className="min-h-[100px]"
+                          autoComplete="off"
                         />
                       </div>
                     </div>
@@ -419,6 +422,7 @@ export default function AccountPage() {
                           },
                         });
                       }}
+                      autoComplete="off"
                     />
                   </div>
                   <div className="space-y-2">
@@ -436,6 +440,7 @@ export default function AccountPage() {
                           },
                         });
                       }}
+                      autoComplete="off"
                     />
                   </div>
                   <div className="space-y-2">
@@ -453,6 +458,7 @@ export default function AccountPage() {
                           },
                         });
                       }}
+                      autoComplete="off"
                     />
                   </div>
                 </CardContent>
