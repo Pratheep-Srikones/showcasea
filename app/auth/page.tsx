@@ -286,6 +286,7 @@ export default function AuthPage() {
                         })
                       }
                       className="pr-10"
+                      autoComplete="off"
                     />
                     <button
                       type="button"
@@ -432,6 +433,7 @@ export default function AuthPage() {
                         })
                       }
                       className="pr-10"
+                      autoComplete="off"
                     />
                     <button
                       type="button"
