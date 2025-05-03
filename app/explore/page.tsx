@@ -17,6 +17,8 @@ import Link from "next/link";
 import { ArtworkType } from "@/types/types";
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc/client";
+import { useArtStore } from "@/store/useArtStore";
+import { useRouter } from "next/navigation";
 
 // Dummy data for explore page
 const artworks = [
@@ -192,6 +194,8 @@ const artworks = [
 
 export default function ExplorePage() {
   const [sortBy, setSortBy] = useState("viewCount");
+  const { setSelectedArtWork } = useArtStore();
+  const router = useRouter();
   const [tag, setTag] = useState("all");
 
   const [count, setCount] = useState(0);
@@ -206,7 +210,7 @@ export default function ExplorePage() {
   }, [countData]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // or 8, or whatever suits your layout
+  const itemsPerPage = 8; // or 8, or whatever suits your layout
 
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
@@ -321,7 +325,12 @@ export default function ExplorePage() {
                   {currentArtworks.map((artwork) => (
                     <Card key={artwork._id} className="overflow-hidden">
                       <CardContent className="p-0">
-                        <Link href={`/artwork/${artwork._id}`}>
+                        <div
+                          onClick={() => {
+                            setSelectedArtWork(artwork);
+                            router.push(`/artwork`);
+                          }}
+                        >
                           <div className="relative aspect-[4/3] w-full overflow-hidden">
                             <Image
                               src={artwork.image_urls[0] || "/placeholder.svg"}
@@ -331,15 +340,18 @@ export default function ExplorePage() {
                               className="object-cover transition-transform hover:scale-105"
                             />
                           </div>
-                        </Link>
+                        </div>
                         <div className="p-4">
                           <div className="flex flex-col space-y-2">
-                            <Link
-                              href={`/artwork/${artwork._id}`}
-                              className="font-medium hover:underline"
+                            <div
+                              onClick={() => {
+                                setSelectedArtWork(artwork);
+                                router.push(`/artwork`);
+                              }}
+                              className="text-lg font-semibold text-foreground cursor-pointer truncate hover:underline"
                             >
                               {artwork.title}
-                            </Link>
+                            </div>
                             <Link
                               href={`/profile/${artwork.artist._id}`}
                               className="flex items-center gap-2"

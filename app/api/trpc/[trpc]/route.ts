@@ -1,6 +1,6 @@
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "@/server/index";
-import { connectDB } from "@/lib/db/mongoose";
+import { connectDB } from "@/db/mongoose";
 import { createContext } from "@/lib/trpc/context";
 
 const handler = async (req: Request) => {

@@ -1,8 +1,8 @@
-import { Comment } from "@/lib/db/models/comment.model";
+import { Comment } from "@/db/models/comment.model";
 import mongoose from "mongoose";
 import { TRPCError } from "@trpc/server";
 
-import { ArtWork } from "@/lib/db/models/artwork.model";
+import { ArtWork } from "@/db/models/artwork.model";
 
 export const AddComment = async (
   user_id: string,
@@ -27,7 +27,7 @@ export const AddComment = async (
       username: 1,
       profile_picture_url: 1,
     });
-    console.log("New comment added:", newComment[0]);
+    //console.log("New comment added:", newComment[0]);
     return {
       message: "Comment added successfully",
       comment: newComment[0],

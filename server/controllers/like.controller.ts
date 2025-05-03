@@ -1,6 +1,6 @@
-import { ArtWork } from "@/lib/db/models/artwork.model";
-import { Like } from "@/lib/db/models/like.model";
-import { User } from "@/lib/db/models/user.model";
+import { ArtWork } from "@/db/models/artwork.model";
+import { Like } from "@/db/models/like.model";
+import { User } from "@/db/models/user.model";
 import { TRPCError } from "@trpc/server";
 import mongoose from "mongoose";
 

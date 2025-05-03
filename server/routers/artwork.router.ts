@@ -9,6 +9,7 @@ import {
   getArtWorkSortedBy,
   getFilteredArtWorkCount,
   getFilteredArtworks,
+  getSuggestedArtworks,
   increaseViewCount,
 } from "../controllers/artwork.controller";
 export const artWorkRouter = router({
@@ -94,6 +95,16 @@ export const artWorkRouter = router({
       return await getFilteredArtworks(
         input.tag,
         input.sortBy,
+        input.start,
+        input.offset
+      );
+    }),
+
+  getSuggestedArtworks: protectedProcedure
+    .input(z.object({ start: z.number(), offset: z.number() }))
+    .query(async ({ input, ctx }) => {
+      return await getSuggestedArtworks(
+        ctx.user._id,
         input.start,
         input.offset
       );

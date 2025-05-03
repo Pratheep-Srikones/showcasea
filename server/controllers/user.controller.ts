@@ -1,5 +1,5 @@
-import { ArtWork } from "@/lib/db/models/artwork.model";
-import { User } from "@/lib/db/models/user.model";
+import { ArtWork } from "@/db/models/artwork.model";
+import { User } from "@/db/models/user.model";
 import { generateToken } from "@/lib/helpers/jwt";
 import { comparePassword, hashPassword } from "@/lib/helpers/password";
 import { TRPCError } from "@trpc/server";

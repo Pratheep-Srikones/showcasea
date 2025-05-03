@@ -23,10 +23,11 @@ import {
   Trash,
   Instagram,
   Twitter,
+  Loader2,
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useParams, useRouter } from "next/navigation";
-import { ArtworkType } from "@/types/types";
+import { ArtworkType, UserType } from "@/types/types";
 import { trpc } from "@/lib/trpc/client";
 import { useArtStore } from "@/store/useArtStore";
 import { toastSuccess, toastError } from "@/lib/helpers/toast";
@@ -48,6 +49,13 @@ export default function UserProfilePage() {
 
   const { data: userProfileData, isLoading: isUserProfileLoading } =
     trpc.user.getUserById.useQuery({ id: user_id as string });
+
+  const [userProfile, setUserProfile] = useState<UserType | null>(null);
+  useEffect(() => {
+    if (userProfileData) {
+      setUserProfile(userProfileData);
+    }
+  }, [userProfileData]);
 
   const { data: userArtworksData, isLoading: isUserArtworksLoading } =
     trpc.artWork.getArtWorksByArtistId.useQuery(user_id as string);
@@ -122,6 +130,74 @@ export default function UserProfilePage() {
       }
     );
   };
+
+  const followMutation = trpc.follow.followUser.useMutation();
+  const unfollowMutation = trpc.follow.unfollowUser.useMutation();
+
+  const { data: isFollowingData, isPending } = trpc.follow.isFollowing.useQuery(
+    {
+      followingId: user_id as string,
+    }
+  );
+
+  const [isFollowing, setIsFollowing] = useState(false);
+  useEffect(() => {
+    if (isFollowingData) {
+      setIsFollowing(isFollowingData);
+    }
+  }, [isFollowingData]);
+
+  const handleFollow = async () => {
+    if (isFollowing) return;
+
+    await followMutation.mutateAsync(
+      { followingId: user_id as string },
+      {
+        onSuccess: () => {
+          toastSuccess("Followed successfully!");
+          setIsFollowing(true);
+          setUserProfile((prev) => {
+            if (prev) {
+              return {
+                ...prev,
+                followerCount: (prev.followerCount || 0) + 1,
+              };
+            }
+            return null;
+          });
+        },
+        onError: () => {
+          toastError("Failed to follow user.");
+        },
+      }
+    );
+  };
+  const handleUnfollow = async () => {
+    if (!isFollowing) return;
+
+    await unfollowMutation.mutateAsync(
+      { followingId: user_id as string },
+      {
+        onSuccess: () => {
+          toastSuccess("Unfollowed successfully!");
+          setIsFollowing(false);
+          setUserProfile((prev) => {
+            if (prev) {
+              return {
+                ...prev,
+                followerCount: Math.max((prev.followerCount || 0) - 1, 0),
+              };
+            }
+            return null;
+          });
+        },
+        onError: () => {
+          toastError("Failed to unfollow user.");
+        },
+      }
+    );
+  };
+
   if (isUserProfileLoading || isUserArtworksLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -152,25 +228,42 @@ export default function UserProfilePage() {
           <div className="flex flex-col items-center md:flex-row md:items-end gap-4">
             <Avatar className="h-32 w-32 border-4 border-background">
               <AvatarImage
-                src={userProfileData?.profile_picture_url}
-                alt={userProfileData?.username}
+                src={userProfile?.profile_picture_url}
+                alt={userProfile?.username}
               />
               <AvatarFallback className="text-5xl font-bold">
-                {userProfileData?.first_name[0].toUpperCase()}
-                {userProfileData?.last_name[0].toUpperCase()}
+                {userProfile?.first_name[0].toUpperCase()}
+                {userProfile?.last_name[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="mt-4 md:mt-0 text-center md:text-left">
               <h1 className="text-2xl md:text-3xl font-bold">
-                {userProfileData?.first_name} {userProfileData?.last_name}
+                {userProfile?.first_name} {userProfile?.last_name}
               </h1>
-              <p className="text-muted-foreground">
-                @{userProfileData?.username}
-              </p>
+              <p className="text-muted-foreground">@{userProfile?.username}</p>
             </div>
           </div>
           <div className="mt-4 md:mt-0 flex gap-2">
-            <Button className={`${isMyPage ? "hidden" : ""}`}>Follow</Button>
+            <Button
+              className={`${isMyPage ? "hidden" : ""}`}
+              disabled={isPending}
+              onClick={() => {
+                if (isPending) return;
+                isFollowing ? handleUnfollow() : handleFollow();
+              }}
+            >
+              {isPending ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Processing...</span>
+                </div>
+              ) : isFollowing ? (
+                <span>Unfollow</span>
+              ) : (
+                <span>Follow</span>
+              )}
+            </Button>
+
             <Button variant="outline" className={`${isMyPage ? "hidden" : ""}`}>
               <Mail className="mr-2 h-4 w-4" />
               Message
@@ -185,41 +278,41 @@ export default function UserProfilePage() {
               <div className="p-6">
                 <h3 className="font-medium">About</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  {userProfileData?.bio || "No bio available."}
+                  {userProfile?.bio || "No bio available."}
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2">
-                  {userProfileData?.social_media?.website && (
+                  {userProfile?.social_media?.website && (
                     <a
-                      href={userProfileData?.social_media?.website}
+                      href={userProfile?.social_media?.website}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <LinkIcon className="h-4 w-4" />
-                      <span>{userProfileData?.social_media?.website}</span>
+                      <span>{userProfile?.social_media?.website}</span>
                     </a>
                   )}
-                  {userProfileData?.social_media?.instagram && (
+                  {userProfile?.social_media?.instagram && (
                     <a
-                      href={`https://instagram.com/${userProfileData?.social_media?.instagram}`}
+                      href={`https://instagram.com/${userProfile?.social_media?.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <Instagram className="h-4 w-4" />
-                      <span>@{userProfileData?.social_media?.instagram}</span>
+                      <span>@{userProfile?.social_media?.instagram}</span>
                     </a>
                   )}
-                  {userProfileData?.social_media?.twitter && (
+                  {userProfile?.social_media?.twitter && (
                     <a
-                      href={`https://twitter.com/${userProfileData?.social_media?.twitter}`}
+                      href={`https://twitter.com/${userProfile?.social_media?.twitter}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
                     >
                       <Twitter className="h-4 w-4" />
-                      <span>@{userProfileData?.social_media?.twitter}</span>
+                      <span>@{userProfile?.social_media?.twitter}</span>
                     </a>
                   )}
                 </div>
@@ -228,13 +321,13 @@ export default function UserProfilePage() {
                 <div className="grid grid-cols-2 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold">
-                      {userProfileData?.followerCount || 0}
+                      {userProfile?.followerCount || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">Followers</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold">
-                      {userProfileData?.followingCount || 0}
+                      {userProfile?.followingCount || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">Following</p>
                   </div>

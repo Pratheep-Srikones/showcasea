@@ -42,7 +42,7 @@ export function Navbar() {
   const isLoggingOut = logoutMutation.isPending;
 
   const navItems = [
-    { name: "Home", href: "/" },
+    { name: "For You", href: "/foryou" },
     { name: "Explore", href: "/explore" },
     { name: "About", href: "/about" },
   ];

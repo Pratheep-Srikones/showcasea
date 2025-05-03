@@ -1,5 +1,5 @@
 import { deleteImage } from "@/lib/cloud/cloudinary";
-import { ArtWork } from "@/lib/db/models/artwork.model";
+import { ArtWork } from "@/db/models/artwork.model";
 import { ArtworkType } from "@/types/types";
 import { TRPCError } from "@trpc/server";
 
@@ -281,20 +281,39 @@ export const getFilteredArtworks = async (
       .skip(start)
       .limit(offset);
 
-    if (!artworks || artworks.length === 0) {
-      console.error("No artworks found for the given filters");
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: "No artworks found for the given filters",
-      });
-    }
-
     return artworks;
   } catch (error) {
     console.error("Error fetching filtered artworks:", error);
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "An error occurred while fetching artworks",
+    });
+  }
+};
+
+export const getSuggestedArtworks = async (
+  userId: string,
+  start: number,
+  offset: number
+) => {
+  try {
+    const artworks = await ArtWork.find({ artist: { $ne: userId } })
+      .populate("artist", {
+        first_name: 1,
+        last_name: 1,
+        profile_picture_url: 1,
+        username: 1,
+      })
+      .sort({ createdAt: -1 })
+      .skip(start)
+      .limit(offset);
+
+    return artworks;
+  } catch (error) {
+    console.error("Error fetching suggested artworks:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An error occurred while fetching suggested artworks",
     });
   }
 };
