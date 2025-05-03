@@ -28,7 +28,6 @@ A full-stack portfolio and social artwork-sharing platform built with Next.js (A
 
 ### Backend
 
-* **Node.js** (via Next.js Server Actions and Express APIs)
 * **TRPC** server handlers
 * **MongoDB** via Mongoose
 * **Cloudinary** for image uploads
@@ -67,7 +66,7 @@ cd pratheep-srikones-showcasea
 ### 2. Install dependencies
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 3. Environment Variables
@@ -77,15 +76,15 @@ Create a `.env.local` file in the root:
 ```env
 MONGODB_URI=your_mongo_connection_string
 JWT_SECRET=your_secret_key
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+CLOUD_NAME=your_cloud_name
+CLOUD_API=your_api_key
+CLOUD_SECRET=your_api_secret
 ```
 
 ### 4. Run the dev server
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
@@ -95,18 +94,10 @@ Open [http://localhost:3000](http://localhost:3000)
 ## 📦 Build
 
 ```bash
-pnpm build
+npm build
 ```
 
 ---
-
-## 📌 Scripts
-
-```bash
-pnpm dev        # Start dev server
-pnpm build      # Build for production
-pnpm lint       # Run linter
-```
 
 ---
 
@@ -134,4 +125,4 @@ Pull requests are welcome. For major changes, open an issue first to discuss wha
 
 ## 📧 Contact
 
-Built by [Pratheep Srikone](mailto:your-email@example.com)
+Built by [Pratheep Srikone](mailto:prathhp231@gmail.com)
