@@ -26,6 +26,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { useAuthStore } from "@/store/useAuthStore";
+import { trpc } from "@/lib/trpc/client";
 
 export function DashboardSidebar() {
   const pathname = usePathname();
@@ -39,6 +40,8 @@ export function DashboardSidebar() {
 
   const { logout, user } = useAuthStore();
   const router = useRouter();
+
+  const { data: unreadCount } = trpc.notification.getUnreadCount.useQuery();
 
   return (
     <div>
@@ -68,9 +71,19 @@ export function DashboardSidebar() {
                       asChild
                       isActive={pathname === item.href}
                     >
-                      <Link href={item.href}>
+                      <Link
+                        href={item.href}
+                        className="relative flex items-center gap-2"
+                      >
                         <item.icon className="h-5 w-5" />
                         <span>{item.name}</span>
+                        {item.name === "Notifications" &&
+                          unreadCount &&
+                          unreadCount > 0 && (
+                            <span className="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-white">
+                              {unreadCount}
+                            </span>
+                          )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
