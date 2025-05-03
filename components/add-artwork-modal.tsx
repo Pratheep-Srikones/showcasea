@@ -29,6 +29,8 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
 
   const [base64Files, setBase64Files] = useState<string[]>([]);
 
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -42,6 +44,10 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
         const urls = await uploadArtWorkImages.mutateAsync(base64Files);
         setImageUrls(urls);
         toastSuccess("Images uploaded successfully!, Submit your artwork");
+        setUploadSuccess(true);
+        setBase64Files([]);
+        setPreviews([]);
+        setFiles([]);
       } catch (error) {
         console.error("Error uploading images:", error);
         toastError("Failed to upload images. Please try again.");
@@ -105,6 +111,7 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
             tags: [],
             imageUrls: [],
           });
+          setUploadSuccess(false);
         },
         onError: (err) => {
           toastError("Artwork upload failed. Please try again.");
@@ -160,6 +167,7 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
                 setFormData({ ...formData, tags });
               }}
               value={formData.tags.join(", ")}
+              autoComplete="off"
             />
           </div>
           <div className="grid gap-2">
@@ -222,7 +230,7 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => uploadImages()}>
+          <Button onClick={() => uploadImages()} disabled={uploadSuccess}>
             <Upload className="mr-2 h-4 w-4" />
             Upload
           </Button>
@@ -234,6 +242,7 @@ export function AddArtworkModal({ children }: { children: React.ReactNode }) {
             onClick={() => {
               handleSubmit();
             }}
+            disabled={!uploadSuccess}
           >
             Submit Artwork
           </Button>

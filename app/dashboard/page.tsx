@@ -24,7 +24,7 @@ import { AddArtworkModal } from "@/components/add-artwork-modal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { trpc } from "@/lib/trpc/client";
 import { ArtworkType } from "@/types/types";
-
+import { optimizeUrl } from "@/lib/helpers/link";
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { data: userArtworksData, isLoading: isUserArtworksLoading } =
@@ -158,10 +158,16 @@ export default function DashboardPage() {
                         <CardContent className="p-0">
                           <div className="relative aspect-square w-full overflow-hidden">
                             <Image
-                              src={artwork.image_urls[0] || "/placeholder.svg"}
+                              src={
+                                optimizeUrl(artwork.image_urls[0]) ||
+                                "/placeholder.svg"
+                              }
                               alt={artwork.title}
                               width={400}
                               height={300}
+                              loading="lazy"
+                              placeholder="blur"
+                              blurDataURL="/placeholder-blur.jpg" // Or a tiny base64 string
                               className="object-cover transition-transform hover:scale-105"
                             />
                           </div>
@@ -208,11 +214,17 @@ export default function DashboardPage() {
                       >
                         <div className="relative h-16 w-16 overflow-hidden rounded-md">
                           <Image
-                            src={artwork.image_urls[0] || "/placeholder.svg"}
+                            src={
+                              optimizeUrl(artwork.image_urls[0]) ||
+                              "/placeholder.svg"
+                            }
                             alt={artwork.title}
-                            width={64}
-                            height={64}
-                            className="object-cover"
+                            width={400}
+                            height={300}
+                            loading="lazy"
+                            placeholder="blur"
+                            blurDataURL="/placeholder-blur.jpg" // Or a tiny base64 string
+                            className="object-cover transition-transform hover:scale-105"
                           />
                         </div>
                         <div className="ml-4 flex-1 space-y-1">

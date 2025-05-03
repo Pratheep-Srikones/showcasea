@@ -88,7 +88,9 @@ export default function AuthPage() {
     e.preventDefault();
 
     if (!acceptedPolicy || !isValidEmail(signupData.email)) {
-      alert("Please accept the terms and conditions and provide a valid email");
+      toastError(
+        "Please accept the terms and conditions and provide a valid email"
+      );
       return;
     }
 
@@ -99,17 +101,17 @@ export default function AuthPage() {
       !signupData.email ||
       !signupData.password
     ) {
-      alert("Please fill in all fields");
+      toastError("Please fill in all fields");
       return;
     }
 
     if (signupData.password.length < 8) {
-      alert("Password must be at least 8 characters long");
+      toastError("Password must be at least 8 characters long");
       return;
     }
 
     if (emailError) {
-      alert(emailError);
+      toastError(emailError);
       return;
     }
 
@@ -145,12 +147,12 @@ export default function AuthPage() {
     e.preventDefault();
 
     if (!loginData.email || !loginData.password) {
-      alert("Please fill in all fields");
+      toastError("Please fill in all fields");
       return;
     }
 
     if (emailError) {
-      alert(emailError);
+      toastError(emailError);
       return;
     }
 
@@ -261,7 +263,7 @@ export default function AuthPage() {
                           : "Invalid email format"
                       );
                     }}
-                    className={emailError ? "border-red-500" : ""}
+                    autoComplete="off"
                   />
                 </div>
                 <div className="space-y-2">
@@ -370,6 +372,7 @@ export default function AuthPage() {
                           first_name: e.target.value,
                         })
                       }
+                      autoComplete="off"
                     />
                   </div>
                   <div className="space-y-2">
@@ -384,6 +387,7 @@ export default function AuthPage() {
                           last_name: e.target.value,
                         })
                       }
+                      autoComplete="off"
                     />
                   </div>
                 </div>
@@ -399,6 +403,7 @@ export default function AuthPage() {
                         username: e.target.value,
                       })
                     }
+                    autoComplete="off"
                   />
                 </div>
                 <div className="space-y-2">
@@ -416,7 +421,7 @@ export default function AuthPage() {
                           : "Invalid email format"
                       );
                     }}
-                    className={emailError ? "border-red-500" : ""}
+                    autoComplete="off"
                   />
                 </div>
                 <div className="space-y-2">
