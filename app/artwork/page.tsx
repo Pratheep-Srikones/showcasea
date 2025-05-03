@@ -15,7 +15,23 @@ import { useAuthStore } from "@/store/useAuthStore";
 
 export default function ArtworkDetailPage() {
   const { user } = useAuthStore();
-  const { seletedArtWork, changeCommentCount, changeLikeCount } = useArtStore();
+  const {
+    seletedArtWork,
+    changeCommentCount,
+    changeLikeCount,
+    hasViewed,
+    setHasViewed,
+  } = useArtStore();
+
+  const increaseViewCountMutation =
+    trpc.artWork.increaseViewCount.useMutation();
+
+  useEffect(() => {
+    if (seletedArtWork && !hasViewed) {
+      increaseViewCountMutation.mutate(seletedArtWork._id as string);
+      setHasViewed(true);
+    }
+  }, []);
 
   const isOwner: boolean = user?._id === seletedArtWork?.artist?._id;
 

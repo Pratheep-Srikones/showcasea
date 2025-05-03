@@ -37,13 +37,12 @@ import { DialogHeader } from "@/components/ui/dialog";
 import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 
 export default function UserProfilePage() {
-  const { setSelectedArtWork, increaseViewCount, seletedArtWork } =
-    useArtStore();
-  const increaseViewCountMutation =
-    trpc.artWork.increaseViewCount.useMutation();
+  const { setSelectedArtWork, seletedArtWork } = useArtStore();
   const params = useParams();
   const { user_id } = params;
   const { user } = useAuthStore();
+
+  const router = useRouter();
 
   const isMyPage = user_id === user?._id;
 
@@ -384,16 +383,11 @@ export default function UserProfilePage() {
                       )}
 
                       <CardContent className="p-0">
-                        <Link
+                        <div
                           onClick={() => {
                             setSelectedArtWork(artwork);
-                            increaseViewCountMutation.mutate(artwork._id, {
-                              onSuccess: () => {
-                                increaseViewCount();
-                              },
-                            });
+                            router.push(`/artwork`);
                           }}
-                          href={`/artwork`}
                         >
                           <div className="relative aspect-[4/3] w-full overflow-hidden">
                             <Image
@@ -404,22 +398,17 @@ export default function UserProfilePage() {
                               className="object-cover transition-transform hover:scale-105"
                             />
                           </div>
-                        </Link>
+                        </div>
                         <div className="p-4">
-                          <Link
+                          <div
                             onClick={() => {
                               setSelectedArtWork(artwork);
-                              increaseViewCountMutation.mutate(artwork._id, {
-                                onSuccess: () => {
-                                  increaseViewCount();
-                                },
-                              });
+                              router.push(`/artwork`);
                             }}
-                            href={`/artwork`}
-                            className="font-medium hover:underline"
+                            className="font-medium hover:underline cursor-pointer"
                           >
                             {artwork.title}
-                          </Link>
+                          </div>
                         </div>
                       </CardContent>
                       <CardFooter className="flex justify-between p-4 pt-0">
