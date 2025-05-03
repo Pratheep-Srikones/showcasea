@@ -65,19 +65,21 @@ export function Navbar() {
             </span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === item.href
-                    ? "text-foreground"
-                    : "text-muted-foreground"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems
+              .filter((item) => item.name !== "For You" || isAuthenticated)
+              .map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    pathname === item.href
+                      ? "text-foreground"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
           </nav>
         </div>
 
