@@ -178,3 +178,123 @@ export const deleteArtwork = async (
     throw error;
   }
 };
+
+export const getArtWorksbyTag = async (tag: string) => {
+  try {
+    const artworks = await ArtWork.find({ tags: tag })
+      .populate("artist", {
+        first_name: 1,
+        last_name: 1,
+        profile_picture_url: 1,
+      })
+      .sort({ createdAt: -1 });
+
+    if (!artworks || artworks.length === 0) {
+      console.error("No artworks found for the given tag:", tag);
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No artworks found for the given tag",
+      });
+    }
+    return artworks;
+  } catch (error) {
+    console.error("Error fetching artworks for tag:", tag, error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An error occurred while fetching artworks",
+    });
+  }
+};
+
+export const getArtWorkSortedBy = async (sortBy: string) => {
+  if (!["createdAt", "viewCount", "likeCount", "viewCount"].includes(sortBy)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Invalid sort parameter",
+    });
+  }
+  try {
+    const artworks = await ArtWork.find({})
+      .populate("artist", {
+        first_name: 1,
+        last_name: 1,
+        profile_picture_url: 1,
+      })
+      .sort({ [sortBy]: -1 });
+
+    if (!artworks || artworks.length === 0) {
+      console.error("No artworks found for the given sort parameter:", sortBy);
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No artworks found for the given sort parameter",
+      });
+    }
+    return artworks;
+  } catch (error) {
+    console.error("Error fetching artworks sorted by:", sortBy, error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An error occurred while fetching artworks",
+    });
+  }
+};
+
+export const getFilteredArtWorkCount = async (tag: string) => {
+  try {
+    const count =
+      tag === "all"
+        ? await ArtWork.countDocuments({})
+        : await ArtWork.countDocuments({ tags: tag });
+    return count;
+  } catch (error) {
+    console.log("Error counting", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An error occurred while fetching artworks",
+    });
+  }
+};
+
+export const getFilteredArtworks = async (
+  tag: string,
+  sortBy: string,
+  start: number,
+  offset: number
+) => {
+  if (!["createdAt", "viewCount", "likeCount"].includes(sortBy)) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Invalid sort parameter",
+    });
+  }
+
+  try {
+    const filter = tag === "all" ? {} : { tags: tag };
+    const artworks = await ArtWork.find(filter)
+      .populate("artist", {
+        first_name: 1,
+        last_name: 1,
+        profile_picture_url: 1,
+        username: 1,
+      })
+      .sort({ [sortBy]: -1 })
+      .skip(start)
+      .limit(offset);
+
+    if (!artworks || artworks.length === 0) {
+      console.error("No artworks found for the given filters");
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "No artworks found for the given filters",
+      });
+    }
+
+    return artworks;
+  } catch (error) {
+    console.error("Error fetching filtered artworks:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An error occurred while fetching artworks",
+    });
+  }
+};

@@ -5,6 +5,10 @@ import {
   deleteArtwork,
   editArtwork,
   getArtWorksByArtistId,
+  getArtWorksbyTag,
+  getArtWorkSortedBy,
+  getFilteredArtWorkCount,
+  getFilteredArtworks,
   increaseViewCount,
 } from "../controllers/artwork.controller";
 export const artWorkRouter = router({
@@ -57,6 +61,41 @@ export const artWorkRouter = router({
         input.artworkId,
         input.image_urls,
         ctx.user._id
+      );
+    }),
+  getArtWorksByTag: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      return await getArtWorksbyTag(input);
+    }),
+
+  getArtWorkSortedBy: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      return await getArtWorkSortedBy(input);
+    }),
+
+  getFilteredArtWorkCount: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      return await getFilteredArtWorkCount(input);
+    }),
+
+  getFilteredArtworks: publicProcedure
+    .input(
+      z.object({
+        tag: z.string(),
+        sortBy: z.string(),
+        start: z.number(),
+        offset: z.number(),
+      })
+    )
+    .query(async ({ input }) => {
+      return await getFilteredArtworks(
+        input.tag,
+        input.sortBy,
+        input.start,
+        input.offset
       );
     }),
 });
