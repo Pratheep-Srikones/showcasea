@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   getTotalCountsForUser,
   getUserById,
+  getUsernameById,
   loginUser,
   logoutUser,
   signupUser,
@@ -105,6 +106,12 @@ export const userRouter = router({
         input.twitter,
         input.instagram
       );
+    }),
+
+  getUsernameById: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      return await getUsernameById(input.id);
     }),
 
   changePassword: protectedProcedure

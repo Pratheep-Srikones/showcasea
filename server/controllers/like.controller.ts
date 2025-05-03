@@ -3,6 +3,7 @@ import { Like } from "@/db/models/like.model";
 import { User } from "@/db/models/user.model";
 import { TRPCError } from "@trpc/server";
 import mongoose from "mongoose";
+import { addNotification } from "./notification.controller";
 
 export const likeArtWork = async (
   liker_id: string,
@@ -32,6 +33,7 @@ export const likeArtWork = async (
       { session }
     );
     await session.commitTransaction();
+    await addNotification(liker_id, artist_id, "like", artWork_id, "");
     return {
       message: "Artwork liked successfully",
       likeId: newLike[0]._id,

@@ -4,6 +4,7 @@ import {
   createArtwork,
   deleteArtwork,
   editArtwork,
+  getArtWorkById,
   getArtWorksByArtistId,
   getArtWorksbyTag,
   getArtWorkSortedBy,
@@ -108,5 +109,11 @@ export const artWorkRouter = router({
         input.start,
         input.offset
       );
+    }),
+
+  getArtWorkById: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ input }) => {
+      return await getArtWorkById(input);
     }),
 });

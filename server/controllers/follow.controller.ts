@@ -1,6 +1,7 @@
 import { Follow } from "@/db/models/follow.model";
 import { User } from "@/db/models/user.model";
 import mongoose from "mongoose";
+import { addNotification } from "./notification.controller";
 
 export const addFollow = async (followerId: string, followingId: string) => {
   const session = await mongoose.startSession();
@@ -28,6 +29,7 @@ export const addFollow = async (followerId: string, followingId: string) => {
       { session }
     );
     await session.commitTransaction();
+    await addNotification(followerId, followingId, "follow", null, null);
     return {
       message: "Followed successfully",
       followId: newFollow[0]._id,

@@ -26,6 +26,12 @@ type SignUpData = {
   password: string;
 };
 export default function AuthPage() {
+  useEffect(() => {
+    document.querySelectorAll("[fdprocessedid]").forEach((el) => {
+      el.removeAttribute("fdprocessedid");
+    });
+  }, []);
+
   const signup = trpc.user.signUp.useMutation();
   const login = trpc.user.login.useMutation();
 
@@ -251,6 +257,7 @@ export default function AuthPage() {
                     id="email"
                     placeholder="name@example.com"
                     type="email"
+                    suppressHydrationWarning
                     value={loginData.email}
                     onChange={(e) => {
                       setLoginData({ ...loginData, email: e.target.value });
@@ -409,6 +416,7 @@ export default function AuthPage() {
                     id="email"
                     placeholder="name@example.com"
                     type="email"
+                    suppressHydrationWarning
                     value={signupData.email}
                     onChange={(e) => {
                       setSignUpData({ ...signupData, email: e.target.value });

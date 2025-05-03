@@ -58,6 +58,23 @@ export const getArtWorksByArtistId = async (artistId: string) => {
   }
 };
 
+export const getArtWorkById = async (artworkId: string) => {
+  try {
+    const artwork = await ArtWork.findById(artworkId).populate("artist", {
+      first_name: 1,
+      last_name: 1,
+      profile_picture_url: 1,
+    });
+    return artwork;
+  } catch (error) {
+    console.error("Error fetching artwork by ID:", artworkId, error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An error occurred while fetching the artwork",
+    });
+  }
+};
+
 export const increaseViewCount = async (artworkId: string) => {
   try {
     const artwork = await ArtWork.findByIdAndUpdate(

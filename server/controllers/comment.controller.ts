@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { TRPCError } from "@trpc/server";
 
 import { ArtWork } from "@/db/models/artwork.model";
+import { addNotification } from "./notification.controller";
 
 export const AddComment = async (
   user_id: string,
@@ -23,6 +24,14 @@ export const AddComment = async (
       { session }
     );
     await session.commitTransaction();
+    const artWork = await ArtWork.findById(artWork_id);
+    await addNotification(
+      user_id,
+      artWork.artist._id as string,
+      "comment",
+      artWork_id,
+      content
+    );
     await newComment[0].populate("userId", {
       username: 1,
       profile_picture_url: 1,
