@@ -156,9 +156,6 @@ export default function AuthPage() {
       return;
     }
 
-    // Call your login mutation here
-    console.log("Login data:", loginData);
-
     login.mutate(
       {
         email: loginData.email,
@@ -170,7 +167,7 @@ export default function AuthPage() {
           setUser(data.user);
           setIsAuthenticated(true);
           toastSuccess("Login successful");
-          router.replace("/dashboard");
+          router.replace("/foryou");
         },
         onError: (error) => {
           toastError(error.message);
