@@ -6,24 +6,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Heart,
   MessageSquare,
   Eye,
   Mail,
   LinkIcon,
+  MoreVertical,
+  Pencil,
+  Share2,
+  Trash,
   Instagram,
   Twitter,
 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useParams, useRouter } from "next/navigation";
-import { ArtworkType, UserType } from "@/types/types";
+import { ArtworkType } from "@/types/types";
 import { trpc } from "@/lib/trpc/client";
 import { useArtStore } from "@/store/useArtStore";
+import { toastSuccess, toastError } from "@/lib/helpers/toast";
+import { useEffect, useState } from "react";
+import { EditArtworkModal } from "@/components/modals/EditArtwork";
+import { DialogHeader } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@radix-ui/react-dialog";
 
 export default function UserProfilePage() {
-  const router = useRouter();
-
-  const { setSelectedArtWork, increaseViewCount } = useArtStore();
+  const { setSelectedArtWork, increaseViewCount, seletedArtWork } =
+    useArtStore();
   const increaseViewCountMutation =
     trpc.artWork.increaseViewCount.useMutation();
   const params = useParams();
@@ -38,7 +52,76 @@ export default function UserProfilePage() {
   const { data: userArtworksData, isLoading: isUserArtworksLoading } =
     trpc.artWork.getArtWorksByArtistId.useQuery(user_id as string);
 
-  const userArtWorks = (userArtworksData as ArtworkType[]) || [];
+  const [modalOpen, setModalOpen] = useState(false);
+  const [action, setAction] = useState<"edit" | "delete" | null>(null);
+
+  const handleEditModalOpen = (artwork: ArtworkType) => {
+    setSelectedArtWork(artwork);
+    setAction("edit");
+    setModalOpen(true);
+  };
+
+  const handleShare = (artwork: ArtworkType) => {
+    navigator.clipboard.writeText(
+      `${window.location.origin}/artwork/${artwork._id}`
+    );
+    toastSuccess("Artwork link copied!");
+  };
+
+  const handleDelete = (id: string) => {
+    setAction("delete");
+    setModalOpen(true);
+    setSelectedArtWork(
+      userArtWorks.find((artwork) => artwork._id === id) ?? null
+    );
+    // confirmation + delete logic
+  };
+
+  const [userArtWorks, setUserArtWorks] = useState(
+    (userArtworksData as ArtworkType[]) || []
+  );
+
+  useEffect(() => {
+    if (userArtworksData) {
+      setUserArtWorks(userArtworksData);
+    }
+  }, [userArtworksData]);
+  const handleUpdateChange = (updatedArtwork: ArtworkType) => {
+    const updatedArtworks = userArtWorks.map((artwork) => {
+      if (artwork._id === updatedArtwork._id) {
+        return { ...artwork, ...updatedArtwork };
+      }
+      return artwork;
+    });
+    setUserArtWorks(updatedArtworks);
+  };
+  const handleDeleteChange = (artworkId: string) => {
+    const updatedArtworks = userArtWorks.filter(
+      (artwork) => artwork._id !== artworkId
+    );
+    setUserArtWorks(updatedArtworks);
+  };
+
+  const deleteArtworkMutation = trpc.artWork.deleteArtwork.useMutation();
+  const handleDeleteArtwork = (artworkId: string, image_urls: string[]) => {
+    deleteArtworkMutation.mutate(
+      { artworkId: artworkId, image_urls: image_urls },
+      {
+        onSuccess: () => {
+          setUserArtWorks((prevArtworks) =>
+            prevArtworks.filter((artwork) => artwork._id !== artworkId)
+          );
+          toastSuccess("Artwork deleted successfully!");
+          handleDeleteChange(artworkId);
+          setSelectedArtWork(null);
+          setModalOpen(false);
+        },
+        onError: () => {
+          toastError("Failed to delete artwork.");
+        },
+      }
+    );
+  };
   if (isUserProfileLoading || isUserArtworksLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -170,7 +253,41 @@ export default function UserProfilePage() {
               <TabsContent value="artworks" className="mt-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {userArtWorks.map((artwork) => (
-                    <Card key={artwork._id} className="overflow-hidden">
+                    <Card
+                      key={artwork._id}
+                      className="relative overflow-hidden"
+                    >
+                      <div className="absolute right-2 top-2 z-10">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="p-1 rounded-full hover:bg-muted">
+                              <MoreVertical className="w-5 h-5" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-32">
+                            <DropdownMenuItem
+                              onClick={() => handleEditModalOpen(artwork)}
+                            >
+                              <Pencil className="w-4 h-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleShare(artwork)}
+                            >
+                              <Share2 className="w-4 h-4 mr-2" />
+                              Share
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(artwork._id)}
+                              className="text-red-600"
+                            >
+                              <Trash className="w-4 h-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
                       <CardContent className="p-0">
                         <Link
                           onClick={() => {
@@ -239,6 +356,59 @@ export default function UserProfilePage() {
           </div>
         </div>
       </div>
+      {/* Modal for Edit/Delete */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <div className="bg-card text-card-foreground rounded-lg p-6 shadow-lg">
+            {action === "edit" && (
+              <EditArtworkModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                updateArray={(updatedArtwork: ArtworkType) => {
+                  handleUpdateChange(updatedArtwork);
+                }}
+              />
+            )}
+            {action === "delete" && (
+              <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+                <DialogContent className="sm:max-w-md text-center">
+                  <DialogHeader>
+                    <DialogTitle className="text-lg font-bold">
+                      Delete Artwork
+                    </DialogTitle>
+                  </DialogHeader>
+
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Are you sure you want to delete this artwork? This action
+                    cannot be undone.
+                  </p>
+
+                  <div className="mt-6 flex justify-center gap-4">
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        handleDeleteArtwork(
+                          seletedArtWork?._id || "",
+                          seletedArtWork?.image_urls || []
+                        );
+                        setModalOpen(false);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

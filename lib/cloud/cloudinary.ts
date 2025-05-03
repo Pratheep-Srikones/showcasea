@@ -70,3 +70,19 @@ export const extractPublicId = (secureUrl: string): string | null => {
     return null;
   }
 };
+
+export const deleteImage = async (image_url: string) => {
+  const public_id = extractPublicId(image_url);
+  if (!public_id) {
+    console.error("Invalid image URL:", image_url);
+    return;
+  }
+  try {
+    await cloudinary.uploader.destroy(public_id, {
+      resource_type: "image",
+    });
+    console.log("Image deleted successfully:", public_id);
+  } catch (error) {
+    console.error("Error deleting image:", error);
+  }
+};
