@@ -6,8 +6,21 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import socket from "@/lib/helpers/socket";
 
 export default function NotificationsPage() {
+  // In NotificationsPage.tsx
+
+  useEffect(() => {
+    socket.on("newNotification", (notification) => {
+      console.log("New notification received:", notification);
+    });
+
+    return () => {
+      socket.off("newNotification");
+    };
+  }, []);
+
   const { setSelectedArtWork } = useArtStore();
   const router = useRouter();
   const { data: notificationsData, isPending } =
