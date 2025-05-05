@@ -53,7 +53,7 @@ pratheep-srikones-showcasea/
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/yourusername/pratheep-srikones-showcasea.git
+git clone https://github.com/pratheep-srikones-showcasea.git
 cd pratheep-srikones-showcasea
 ```
 
