@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/helpers/jwt";
+import { verifyToken } from "@/lib/utils/jwt";
 import { getUserById } from "@/server/controllers/user.controller";
 
 export async function createContext() {

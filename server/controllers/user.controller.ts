@@ -1,7 +1,7 @@
 import { ArtWork } from "@/db/models/artwork.model";
 import { User } from "@/db/models/user.model";
-import { generateToken } from "@/lib/helpers/jwt";
-import { comparePassword, hashPassword } from "@/lib/helpers/password";
+import { generateToken } from "@/lib/utils/jwt";
+import { comparePassword, hashPassword } from "@/lib/utils/password";
 import { TRPCError } from "@trpc/server";
 import { cookies } from "next/headers";
 import { uploadProfileImage } from "@/lib/cloud/cloudinary";
@@ -84,7 +84,6 @@ export const loginUser = async ({
   };
 };
 export const logoutUser = async () => {
-  console.log("logging out...");
   (await cookies()).set("token", "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -171,15 +170,13 @@ export const getTotalCountsForUser = async (userId: string) => {
 };
 
 export const updateUserPicture = async (userId: string, imageStr: string) => {
-  console.log("Updating user picture for user ID:", userId);
   if (!userId || !imageStr) {
     throw new TRPCError({
       code: "BAD_REQUEST",
       message: "User ID and image string are required",
     });
   }
-  console.log("User ID:", userId);
-  console.log("Image string:");
+
   const upload_url = await uploadProfileImage(imageStr, userId);
   if (!upload_url) {
     throw new TRPCError({
@@ -187,16 +184,13 @@ export const updateUserPicture = async (userId: string, imageStr: string) => {
       message: "Failed to upload image",
     });
   }
-  console.log("uploaded");
+
   imageStr = upload_url; // Use the uploaded URL for the image
-  console.log("Uploaded image URL:", imageStr);
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     { profile_picture_url: imageStr },
     { new: true }
   ).select("-password"); // Exclude password from the result
-
-  console.log("Updated user:", updatedUser);
 
   if (!updatedUser) {
     throw new TRPCError({

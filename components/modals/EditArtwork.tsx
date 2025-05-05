@@ -15,7 +15,7 @@ import { useState } from "react";
 import { ArtworkType } from "@/types/types";
 import { useArtStore } from "@/store/useArtStore";
 import { trpc } from "@/lib/trpc/client";
-import { toastError, toastSuccess } from "@/lib/helpers/toast";
+import { toastError, toastSuccess } from "@/lib/utils/toast";
 
 export function EditArtworkModal({
   open,

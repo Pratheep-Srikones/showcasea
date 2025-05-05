@@ -2,5 +2,5 @@
   "watch": ["server"],
   "ext": "ts",
   "ignore": ["node_modules"],
-  "exec": "tsx server/socket.ts"
+  "exec": "tsx server/socket/index.ts"
 }

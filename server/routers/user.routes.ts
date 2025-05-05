@@ -27,7 +27,6 @@ export const userRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      console.log("Input data:", input);
       return signupUser(input);
     }),
   login: publicProcedure
@@ -39,8 +38,6 @@ export const userRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      console.log("Input data:", input);
-      console.log(loginUser(input));
       return loginUser(input);
     }),
 
@@ -56,7 +53,6 @@ export const userRouter = router({
   getUserById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
-      console.log("Input data:", input);
       return await getUserById(input.id);
     }),
 
@@ -67,8 +63,6 @@ export const userRouter = router({
   updateProfilePic: protectedProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
-      console.log("Router called");
-      console.log("Input data:");
       const result = await updateUserPicture(ctx.user._id, input);
 
       return result;

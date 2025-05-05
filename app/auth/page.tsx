@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
-import { toastError, toastSuccess } from "@/lib/helpers/toast";
+import { toastError, toastSuccess } from "@/lib/utils/toast";
 import { useAuthStore } from "@/store/useAuthStore";
 type loginData = {
   email: string;
@@ -35,7 +35,7 @@ export default function AuthPage() {
   const signup = trpc.user.signUp.useMutation();
   const login = trpc.user.login.useMutation();
 
-  const { setIsAuthenticated, setUser } = useAuthStore();
+  const { setIsAuthenticated, setUser, connectSocket } = useAuthStore();
 
   const [signupData, setSignUpData] = useState<SignUpData>({
     first_name: "",
@@ -174,6 +174,7 @@ export default function AuthPage() {
           setIsAuthenticated(true);
           toastSuccess("Login successful");
           router.replace("/foryou");
+          connectSocket();
         },
         onError: (error) => {
           toastError(error.message);

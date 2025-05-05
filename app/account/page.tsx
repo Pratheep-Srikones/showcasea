@@ -23,7 +23,7 @@ import { Upload, User, Lock, Bell, Palette, Shield } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { UserType } from "@/types/types";
 import { trpc } from "@/lib/trpc/client";
-import { toastError, toastSuccess } from "@/lib/helpers/toast";
+import { toastError, toastSuccess } from "@/lib/utils/toast";
 
 export default function AccountPage() {
   const { user, setUser } = useAuthStore();

@@ -6,27 +6,42 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import socket from "@/lib/helpers/socket";
+import { useNotificationStore } from "@/store/useNotificationStore";
+import { NotificationType } from "@/types/types";
+import { useAuthStore } from "@/store/useAuthStore";
+import { toastError } from "@/lib/utils/toast";
 
 export default function NotificationsPage() {
   // In NotificationsPage.tsx
 
-  useEffect(() => {
-    socket.on("newNotification", (notification) => {
-      console.log("New notification received:", notification);
-    });
+  const { user, connectSocket } = useAuthStore();
 
-    return () => {
-      socket.off("newNotification");
-    };
-  }, []);
+  const { subscribeToNotifications, unsubscribeFromNotifications } =
+    useNotificationStore();
+
+  const [notifications, setNotifications] = useState<NotificationType[]>([]);
 
   const { setSelectedArtWork } = useArtStore();
   const router = useRouter();
   const { data: notificationsData, isPending } =
     trpc.notification.getNotifications.useQuery();
 
-  const [notifications, setNotifications] = useState<any[]>([]);
+  useEffect(() => {
+    const socket = connectSocket(user?._id!);
+
+    if (socket) {
+      subscribeToNotifications(socket, user?._id!, (notification) => {
+        setNotifications((prev) => [notification, ...prev]);
+      });
+
+      return () => {
+        unsubscribeFromNotifications(socket);
+      };
+    } else {
+      toastError("Socket not connected. Cannot subscribe to notifications.");
+    }
+  }, [user?._id]);
+
   useEffect(() => {
     if (notificationsData) {
       setNotifications(notificationsData);
@@ -68,11 +83,11 @@ export default function NotificationsPage() {
             onClick={() => {
               if (!n.isRead) {
                 markAsRead.mutate(
-                  { notificationId: n._id },
+                  { notificationId: n._id ?? "" },
                   {
                     onSuccess: () => {
-                      setNotifications((prev) =>
-                        prev.map((notification) =>
+                      setNotifications(
+                        notifications.map((notification: NotificationType) =>
                           notification._id === n._id
                             ? { ...notification, isRead: true }
                             : notification
@@ -89,9 +104,9 @@ export default function NotificationsPage() {
             )}
 
             <div className="flex items-start gap-3">
-              {n.sender?.profilePic && (
+              {n.sender?.profile_picture_url && (
                 <Image
-                  src={n.sender.profilePic}
+                  src={n.sender.profile_picture_url}
                   alt={n.sender.username}
                   width={40}
                   height={40}
@@ -129,7 +144,7 @@ export default function NotificationsPage() {
                 {n.artwork && (
                   <div
                     onClick={() => {
-                      fetchArtwork.mutate(n.artwork._id, {
+                      fetchArtwork.mutate(n.artwork?._id!, {
                         onSuccess: (artwork) => {
                           setSelectedArtWork(artwork);
                           router.push(`/artwork`);
@@ -144,7 +159,7 @@ export default function NotificationsPage() {
 
                 {isClient && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(n.createdAt).toLocaleString()}
+                    {new Date(n.createdAt || "").toLocaleString()}
                   </p>
                 )}
               </div>

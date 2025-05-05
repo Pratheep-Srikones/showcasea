@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, ImageIcon } from "lucide-react";
 import { trpc } from "@/lib/trpc/client";
-import { toastError, toastSuccess } from "@/lib/helpers/toast";
+import { toastError, toastSuccess } from "@/lib/utils/toast";
 
 export function AddArtworkModal({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);

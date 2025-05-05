@@ -18,7 +18,7 @@ import {
 import { useAuthStore } from "@/store/useAuthStore";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
-import { toastError, toastSuccess } from "@/lib/helpers/toast";
+import { toastError, toastSuccess } from "@/lib/utils/toast";
 
 export function Navbar() {
   const pathname = usePathname();

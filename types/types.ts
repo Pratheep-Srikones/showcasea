@@ -57,3 +57,18 @@ export interface CommentType {
   updatedAt: string;
   __v: number;
 }
+
+export interface NotificationType {
+  _id?: string;
+  recipient: string;
+  sender?: UserType;
+  type: "like" | "comment" | "follow" | "system";
+  artwork?: ArtworkType;
+  comment?: string;
+  isRead?: boolean;
+  readAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
+}
+import { Types } from "mongoose";

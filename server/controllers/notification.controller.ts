@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { Notification } from "@/db/models/notfication.model";
+import { redisPub, connectRedis } from "@/lib/utils/redis";
 
 export const addNotification = async (
   sender: string,
@@ -16,7 +17,32 @@ export const addNotification = async (
       artwork,
       comment,
     });
-    return newNotification;
+
+    const populatedNotification = await Notification.findById(
+      newNotification._id
+    )
+      .populate("sender", {
+        username: 1,
+        profile_picture_url: 1,
+      })
+      .populate("artwork", {
+        title: 1,
+        image_url: 1,
+      });
+
+    await connectRedis();
+
+    if (redisPub.isReady) {
+      console.log("Redis is ready, publishing notification...");
+      await redisPub.publish(
+        "newNotification",
+        JSON.stringify({
+          userId: recipient,
+          notification: populatedNotification,
+        })
+      );
+    }
+    return populatedNotification;
   } catch (error) {
     console.error("Error adding notification:", error);
     throw new TRPCError({

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "socket": "nodemon",
+    "client":"next dev",
     "dev": "concurrently \"npm run socket\" \"next dev\"",
     "build": "next build",
     "start": "next start",
@@ -68,6 +69,7 @@
     "react-hot-toast": "^2.5.2",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
+    "redis": "^5.0.0",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "sonner": "^1.7.1",

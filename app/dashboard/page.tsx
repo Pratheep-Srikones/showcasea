@@ -24,7 +24,7 @@ import { AddArtworkModal } from "@/components/add-artwork-modal";
 import { useAuthStore } from "@/store/useAuthStore";
 import { trpc } from "@/lib/trpc/client";
 import { ArtworkType } from "@/types/types";
-import { optimizeUrl } from "@/lib/helpers/link";
+import { optimizeUrl } from "@/lib/utils/link";
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const { data: userArtworksData, isLoading: isUserArtworksLoading } =

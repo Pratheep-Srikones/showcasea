@@ -30,7 +30,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArtworkType, UserType } from "@/types/types";
 import { trpc } from "@/lib/trpc/client";
 import { useArtStore } from "@/store/useArtStore";
-import { toastSuccess, toastError } from "@/lib/helpers/toast";
+import { toastSuccess, toastError } from "@/lib/utils/toast";
 import { useEffect, useState } from "react";
 import { EditArtworkModal } from "@/components/modals/EditArtwork";
 import { DialogHeader } from "@/components/ui/dialog";
