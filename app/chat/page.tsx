@@ -6,6 +6,7 @@ import { trpc } from "@/lib/trpc/client";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ChatType } from "@/types/types";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // 👇 ChatSkeleton component
 const ChatSkeleton = () => (
@@ -26,6 +27,8 @@ export default function ChatsPage() {
   const { data: chatsData, isPending } = trpc.chat.getChats.useQuery({
     userId: user?._id || "",
   });
+  const markAsReadMutation = trpc.chat.markAsRead.useMutation();
+  const router = useRouter();
 
   const [chats, setChats] = useState<ChatType[]>([]);
 
@@ -59,13 +62,16 @@ export default function ChatsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {chats.map((chat) => {
+              {chats.map((chat: ChatType) => {
                 const otherParticipant = chat.participants.find(
                   (p) => p._id !== user?._id
                 )!;
                 return (
-                  <Link
-                    href={`/chat/${chat._id}`}
+                  <div
+                    onClick={() => {
+                      markAsReadMutation.mutate(chat._id!);
+                      router.push(`/chat/${chat._id}`);
+                    }}
                     key={chat._id}
                     className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition"
                   >
@@ -107,7 +113,7 @@ export default function ChatsPage() {
                           </span>
                         )}
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

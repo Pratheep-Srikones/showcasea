@@ -21,6 +21,7 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+    domains:['images.unsplash.com', 'images.pexels.com', 'images.unsplash.com'],
   },
   experimental: {
     webpackBuildWorker: true,

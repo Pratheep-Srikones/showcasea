@@ -45,7 +45,7 @@ export default function Home() {
               <div className="relative w-full max-w-[500px] aspect-square overflow-hidden rounded-lg">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 animate-pulse" />
                 <Image
-                  src="/placeholder.svg?height=600&width=600"
+                  src="/logo.png?height=600&width=600"
                   width={600}
                   height={600}
                   alt="Showcasa Art Gallery"

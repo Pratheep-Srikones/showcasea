@@ -39,7 +39,7 @@ redisEventsClient.subscribe("newNotification", (payload) => {
 redisEventsClient.subscribe("newMessage", (payload) => {
   try {
     const { newMessage, receiverId } = JSON.parse(payload);
-    io.to(receiverId).emit("newMessage", newMessage);
+    io.to(receiverId).emit("newMessage", { newMessage, receiverId });
     console.log("Message sent to user:", receiverId);
   } catch (err) {
     console.error("Invalid newMessage payload", err);

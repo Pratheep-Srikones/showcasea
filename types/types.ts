@@ -85,7 +85,6 @@ export interface MessageType {
   sender: UserType; // User ID as string
   chat: string; // Chat ID as string
   content: string;
-  isRead: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

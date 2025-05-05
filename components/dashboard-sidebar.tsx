@@ -43,6 +43,8 @@ export function DashboardSidebar() {
   const router = useRouter();
 
   const { data: unreadCount } = trpc.notification.getUnreadCount.useQuery();
+  const { data: messageCount } = trpc.message.getTotalUnreadCount.useQuery();
+  console.log("Message Count:", messageCount);
 
   return (
     <div>
@@ -78,13 +80,20 @@ export function DashboardSidebar() {
                       >
                         <item.icon className="h-5 w-5" />
                         <span>{item.name}</span>
-                        {item.name === "Notifications" &&
-                          unreadCount &&
-                          unreadCount > 0 && (
-                            <span className="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-white">
-                              {unreadCount}
-                            </span>
-                          )}
+
+                        {/* Notifications count */}
+                        {item.name === "Notifications" && unreadCount! > 0 && (
+                          <span className="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-white">
+                            {unreadCount}
+                          </span>
+                        )}
+
+                        {/* Messages count */}
+                        {item.name === "Messages" && messageCount > 0 && (
+                          <span className="ml-auto inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-white">
+                            {messageCount}
+                          </span>
+                        )}
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

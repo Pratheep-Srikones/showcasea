@@ -6,18 +6,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useNotificationStore } from "@/store/useNotificationStore";
 import { NotificationType } from "@/types/types";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toastError } from "@/lib/utils/toast";
+import {
+  subscribeToNotifications,
+  unsubscribeFromNotifications,
+} from "@/lib/utils/notications";
 
 export default function NotificationsPage() {
   // In NotificationsPage.tsx
 
   const { user, connectSocket } = useAuthStore();
-
-  const { subscribeToNotifications, unsubscribeFromNotifications } =
-    useNotificationStore();
 
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
 

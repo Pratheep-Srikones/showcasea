@@ -133,3 +133,20 @@ export const addMessage = async (
     });
   }
 };
+
+export const getTotalUnreadCount = async (userId: string) => {
+  try {
+    const chats = await Chat.find({ participants: userId });
+    const totalUnreadCount = chats.reduce((acc, chat) => {
+      const unreadCount = chat.unreadCounts?.[userId] || 0;
+      return acc + unreadCount;
+    }, 0);
+    return totalUnreadCount;
+  } catch (error) {
+    console.error("Error fetching total unread count:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to get total unread count",
+    });
+  }
+};

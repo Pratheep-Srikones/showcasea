@@ -6,6 +6,7 @@ import {
   getChat,
   createChat,
   doesChatExist,
+  markAsRead,
 } from "../controllers/chat.controller";
 
 export const chatRouter = router({
@@ -31,5 +32,11 @@ export const chatRouter = router({
     .input(z.object({ participants: z.array(z.string()) }))
     .query(async ({ input, ctx }) => {
       return await doesChatExist(input.participants);
+    }),
+
+  markAsRead: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ input, ctx }) => {
+      return await markAsRead(input, ctx.user._id);
     }),
 });

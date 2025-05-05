@@ -87,3 +87,27 @@ export const doesChatExist = async (participants: string[]) => {
     });
   }
 };
+
+export const markAsRead = async (chatId: string, userId: string) => {
+  try {
+    const chat = await Chat.findById(chatId);
+    if (!chat) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Chat not found",
+      });
+    }
+
+    // Mark all messages as read for the user
+    chat.unreadCounts.set(userId, 0);
+    await chat.save();
+
+    return null; // or return the updated chat if needed
+  } catch (error) {
+    console.error("Error marking chat as read:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to mark chat as read",
+    });
+  }
+};

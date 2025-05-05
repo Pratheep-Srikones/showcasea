@@ -1,10 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { trpc } from "@/lib/trpc/client";
 import { ChatType, MessageType } from "@/types/types";
 import { useAuthStore } from "@/store/useAuthStore";
+import {
+  subscribeToMessages,
+  unsubscribeFromMessages,
+} from "@/lib/utils/messages";
+import { toastError } from "@/lib/utils/toast";
 
 // Skeleton Components
 const ChatHeaderSkeleton = () => (
@@ -28,7 +33,24 @@ const MessageSkeleton = () => (
 );
 
 export default function ChatDetailPage() {
-  const { user } = useAuthStore();
+  const { user, connectSocket } = useAuthStore();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null); // Ref for the last message
+
+  useEffect(() => {
+    const socket = connectSocket(user?._id!);
+
+    if (socket) {
+      subscribeToMessages(socket, user?._id!, (newMessage) => {
+        setMessages((prev) => [...prev, newMessage]);
+      });
+
+      return () => {
+        unsubscribeFromMessages(socket);
+      };
+    } else {
+      toastError("Socket not connected. Cannot subscribe to messages.");
+    }
+  }, [user?._id]);
   const currentUserId = user?._id || "";
   const params = useParams();
   const chatId = params.id as string;
@@ -69,6 +91,11 @@ export default function ChatDetailPage() {
     );
   };
 
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
   return (
     <div className="min-h-screen bg-background py-12 px-4 flex justify-center items-start">
       <div className="w-full max-w-3xl bg-white dark:bg-muted rounded-2xl shadow-lg flex flex-col h-[85vh] overflow-hidden border">
@@ -121,6 +148,7 @@ export default function ChatDetailPage() {
               );
             })
           )}
+          <div ref={messagesEndRef} /> {/* Empty div to scroll into view */}
         </div>
 
         {/* Input */}
