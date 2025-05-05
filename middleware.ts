@@ -35,5 +35,6 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/foryou/:path*",
+    "/chat/:path*",
   ],
 };
