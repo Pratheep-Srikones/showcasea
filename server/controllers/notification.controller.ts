@@ -30,7 +30,9 @@ export const addNotification = async (
         image_url: 1,
       });
 
-    await connectRedis();
+    if (!redisPub.isReady) {
+      await connectRedis();
+    }
 
     if (redisPub.isReady) {
       console.log("Redis is ready, publishing notification...");

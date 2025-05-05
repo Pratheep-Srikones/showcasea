@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { Message } from "@/db/models/message.model";
 import mongoose from "mongoose";
 import { Chat } from "@/db/models/chat.model";
+import { redisPub, connectRedis } from "@/lib/utils/redis";
 
 export const getMessages = async (chatId: string) => {
   try {
@@ -73,10 +74,11 @@ export const addMessage = async (
       },
       { session }
     );
-
+    let reciver;
     // Update unreadCounts for other participants
     for (const receiverId of chat.participants) {
       if (receiverId.toString() !== senderId.toString()) {
+        reciver = receiverId.toString(); //since there are only two participants, we can use the other one as receiverId
         const receiverKey = `unreadCounts.${receiverId}`;
 
         if (!chat.unreadCounts?.[receiverId.toString()]) {
@@ -107,7 +109,19 @@ export const addMessage = async (
       .populate("chat", {
         participants: 1,
       });
-
+    if (!redisPub.isReady) {
+      await connectRedis();
+    }
+    if (redisPub.isReady) {
+      console.log("Redis is ready, publishing message...");
+      await redisPub.publish(
+        "newMessage",
+        JSON.stringify({
+          newMessage: populatedMessage,
+          receiverId: reciver,
+        })
+      );
+    }
     return populatedMessage;
   } catch (error) {
     await session.abortTransaction();

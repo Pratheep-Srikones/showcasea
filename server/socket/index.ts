@@ -1,56 +1,70 @@
-// server/socket.ts
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
 import { createClient } from "redis";
+import { createAdapter } from "@socket.io/redis-adapter";
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
-  cors: { origin: "http://localhost:3000" }, // Adjust for your frontend
+  cors: { origin: "http://localhost:3000" },
 });
 
-const redisSub = createClient({
-  url: process.env.REDIS_URL,
+// Redis clients for adapter
+const redisPub = createClient({ url: process.env.REDIS_URL });
+const redisSub = redisPub.duplicate(); // Needed for adapter
+
+await redisPub.connect();
+await redisSub.connect();
+
+io.adapter(createAdapter(redisPub, redisSub));
+console.log("Socket.IO server connected to Redis");
+
+// External Redis client for events published by your backend
+const redisEventsClient = createClient({ url: process.env.REDIS_URL });
+await redisEventsClient.connect();
+
+// Listen for newNotification events
+redisEventsClient.subscribe("newNotification", (payload) => {
+  try {
+    const { userId, notification } = JSON.parse(payload);
+    io.to(userId).emit("newNotification", notification);
+  } catch (err) {
+    console.error("Invalid newNotification payload", err);
+  }
 });
 
-redisSub.connect().then(() => {
-  console.log("Server connected to Redis");
+// Listen for newMessage events
+redisEventsClient.subscribe("newMessage", (payload) => {
+  try {
+    const { newMessage, receiverId } = JSON.parse(payload);
+    io.to(receiverId).emit("newMessage", newMessage);
+    console.log("Message sent to user:", receiverId);
+  } catch (err) {
+    console.error("Invalid newMessage payload", err);
+  }
 });
 
-let userSockets: { [key: string]: string } = {}; // Store user sockets
-export const getUserSocketId = (userId: string) => {
-  return userSockets[userId];
-};
-
-redisSub.subscribe("newNotification", (payload) => {
-  const data = JSON.parse(payload);
-  const { userId, notification } = data;
-  const userSocket = userSockets[userId as string];
-  console.log("Redis data received:", data);
-  io.to(userSocket).emit("newNotification", notification); // Send notification to user
-  console.log("Notification sent to user:", userId);
-  console.log("User socket ID:", userSocket);
-});
-
+// Socket connection handler
 io.on("connection", (socket) => {
-  console.log("a user connected" + socket.id);
-  //console.log("Query:", socket.handshake.query.userId);
   const userId = socket.handshake.query.userId as string;
+
   if (!userId) {
-    console.error("User ID not provided in socket connection.");
+    console.error("User ID missing from connection");
+    socket.disconnect();
     return;
   }
-  // Update the socket ID for the user, ensuring no duplicates
-  userSockets[userId] = socket.id;
-  //console.log(userSockets);
+
+  // Join a room named after the user ID
+  socket.join(userId);
+  console.log(`User ${userId} joined room ${userId}`);
 
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    console.log(`User ${userId} disconnected`);
+    // No need to manually clean up — Socket.IO handles room cleanup
   });
 });
-
-// Send a new notification every 3 seconds
 
 server.listen(4000, () => {
   console.log("Socket.IO server running on port 4000");

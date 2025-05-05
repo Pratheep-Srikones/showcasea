@@ -19,6 +19,8 @@ const connectRedis = async () => {
 redisPub.on("error", (err) => {
   console.error("Redis client error:", err);
   redisConnected = false;
+
+  setTimeout(connectRedis, 5000); // Retry after 5 seconds
 });
 
 export { redisPub, connectRedis };
