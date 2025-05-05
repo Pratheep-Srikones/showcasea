@@ -5,12 +5,12 @@ import { Chat } from "@/db/models/chat.model";
 
 export const getMessages = async (chatId: string) => {
   try {
-    const messages = await Message.find({ chatId })
+    const messages = await Message.find({ chat: chatId })
       .populate("sender", {
         username: 1,
         profile_picture_url: 1,
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: 1 });
 
     return messages;
   } catch (error) {
@@ -39,6 +39,7 @@ export const addMessage = async (
       });
     }
 
+    // Create message
     const message = await Message.create(
       [
         {
@@ -50,21 +51,21 @@ export const addMessage = async (
       { session }
     );
 
-    const newMessage = await Message.findById(message[0]._id)
-      .populate("sender", {
-        username: 1,
-        profile_picture_url: 1,
-      })
-      .populate("chat", {
-        participants: 1,
+    const newMessageId = message?.[0]?._id;
+    if (!newMessageId) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Message creation failed",
       });
+    }
 
+    // Update lastMessage and sender's unread count (set to 0 if needed)
     const senderKey = `unreadCounts.${senderId}`;
     await Chat.findByIdAndUpdate(
       chatId,
       {
         $set: {
-          lastMessage: newMessage._id,
+          lastMessage: newMessageId,
         },
         $setOnInsert: {
           [senderKey]: 0,
@@ -73,10 +74,12 @@ export const addMessage = async (
       { session }
     );
 
+    // Update unreadCounts for other participants
     for (const receiverId of chat.participants) {
       if (receiverId.toString() !== senderId.toString()) {
         const receiverKey = `unreadCounts.${receiverId}`;
-        if (!chat.unreadCounts?.has(receiverId.toString())) {
+
+        if (!chat.unreadCounts?.[receiverId.toString()]) {
           await Chat.findByIdAndUpdate(
             chatId,
             { $set: { [receiverKey]: 0 } },
@@ -93,15 +96,26 @@ export const addMessage = async (
     }
 
     await session.commitTransaction();
-    return newMessage;
+    session.endSession();
+
+    // Populate outside the transaction
+    const populatedMessage = await Message.findById(newMessageId)
+      .populate("sender", {
+        username: 1,
+        profile_picture_url: 1,
+      })
+      .populate("chat", {
+        participants: 1,
+      });
+
+    return populatedMessage;
   } catch (error) {
     await session.abortTransaction();
+    session.endSession();
     console.error(error);
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Failed to add message",
     });
-  } finally {
-    session.endSession();
   }
 };

@@ -71,4 +71,21 @@ export interface NotificationType {
   updatedAt?: string;
   __v?: number;
 }
-import { Types } from "mongoose";
+export interface ChatType {
+  _id?: string;
+  participants: UserType[]; // or: User[] if fully populated
+  lastMessage?: MessageType; // or: Message if populated
+  unreadCounts: Map<string, number>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MessageType {
+  _id?: string;
+  sender: UserType; // User ID as string
+  chat: string; // Chat ID as string
+  content: string;
+  isRead: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}

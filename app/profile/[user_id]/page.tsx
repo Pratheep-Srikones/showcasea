@@ -93,6 +93,7 @@ export default function UserProfilePage() {
       setUserArtWorks(userArtworksData);
     }
   }, [userArtworksData]);
+
   const handleUpdateChange = (updatedArtwork: ArtworkType) => {
     const updatedArtworks = userArtWorks.map((artwork) => {
       if (artwork._id === updatedArtwork._id) {
@@ -197,6 +198,12 @@ export default function UserProfilePage() {
     );
   };
 
+  const { data: chatExsists } = trpc.chat.doesChatExist.useQuery({
+    participants: [user_id as string, user?._id as string],
+  });
+
+  const createChatMutation = trpc.chat.createChat.useMutation();
+
   if (isUserProfileLoading || isUserArtworksLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -207,7 +214,23 @@ export default function UserProfilePage() {
       </div>
     );
   }
-
+  const handleChat = async () => {
+    if (chatExsists?.exists) {
+      router.push(`/chat/${chatExsists.chatId}`);
+    } else {
+      await createChatMutation.mutateAsync(
+        { participants: [user_id as string, user?._id as string] },
+        {
+          onSuccess: (data) => {
+            router.push(`/chat/${data._id}`);
+          },
+          onError: () => {
+            toastError("Failed to create chat.");
+          },
+        }
+      );
+    }
+  };
   return (
     <div className="flex flex-col min-h-screen">
       {/* Cover Image */}
@@ -263,7 +286,11 @@ export default function UserProfilePage() {
               )}
             </Button>
 
-            <Button variant="outline" className={`${isMyPage ? "hidden" : ""}`}>
+            <Button
+              variant="outline"
+              className={`${isMyPage ? "hidden" : ""}`}
+              onClick={handleChat}
+            >
               <Mail className="mr-2 h-4 w-4" />
               Message
             </Button>

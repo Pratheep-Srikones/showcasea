@@ -1,108 +1,126 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
+import { trpc } from "@/lib/trpc/client";
+import { ChatType, MessageType } from "@/types/types";
+import { useAuthStore } from "@/store/useAuthStore";
 
-const currentUserId = "user1";
+// Skeleton Components
+const ChatHeaderSkeleton = () => (
+  <div className="flex items-center gap-4 px-6 py-4 border-b animate-pulse">
+    <div className="w-10 h-10 rounded-full bg-muted" />
+    <div className="w-32 h-4 bg-muted rounded" />
+  </div>
+);
 
-// Mock chat data
-const sampleChat = {
-  _id: "chat1",
-  participants: [
-    {
-      _id: "user1",
-      name: "Alex Monroe",
-      avatar: "/avatars/alex.jpg",
-    },
-    {
-      _id: "user2",
-      name: "Jamie Lane",
-      avatar: "/avatars/jamie.jpg",
-    },
-  ],
-  messages: [
-    {
-      _id: "msg1",
-      sender: {
-        _id: "user1",
-        name: "Alex Monroe",
-        avatar: "/avatars/alex.jpg",
-      },
-      content: "Hey! How are you doing?",
-      createdAt: "2025-05-05T10:00:00Z",
-    },
-    {
-      _id: "msg2",
-      sender: {
-        _id: "user2",
-        name: "Jamie Lane",
-        avatar: "/avatars/jamie.jpg",
-      },
-      content: "I'm good, just working on our project.",
-      createdAt: "2025-05-05T10:02:00Z",
-    },
-  ],
-};
+const MessageSkeleton = () => (
+  <div className="space-y-3 px-6">
+    {[...Array(4)].map((_, i) => (
+      <div
+        key={i}
+        className={`w-1/2 h-4 rounded-xl bg-muted ${
+          i % 2 === 0 ? "ml-auto" : "mr-auto"
+        }`}
+      />
+    ))}
+  </div>
+);
 
 export default function ChatDetailPage() {
-  const [messages, setMessages] = useState(sampleChat.messages);
+  const { user } = useAuthStore();
+  const currentUserId = user?._id || "";
+  const params = useParams();
+  const chatId = params.id as string;
+
+  const { data: currentChatData, isPending: chatLoading } =
+    trpc.chat.getChat.useQuery({ chatId });
+  const { data: messagesData, isPending: messagesLoading } =
+    trpc.message.getMessages.useQuery({ chatId });
+
+  const [chat, setChat] = useState<ChatType | null>(null);
+  const [messages, setMessages] = useState<MessageType[]>([]);
   const [newMessage, setNewMessage] = useState("");
 
-  const otherParticipant = sampleChat.participants.find(
+  useEffect(() => {
+    if (currentChatData) setChat(currentChatData);
+  }, [currentChatData]);
+
+  useEffect(() => {
+    if (messagesData) setMessages(messagesData);
+  }, [messagesData]);
+
+  const otherParticipant = chat?.participants.find(
     (p) => p._id !== currentUserId
   );
 
+  const sendMessageMutation = trpc.message.addMessage.useMutation();
   const handleSend = () => {
-    if (!newMessage.trim()) return;
+    if (newMessage.trim() === "") return;
 
-    const newMsg = {
-      _id: `msg${Date.now()}`,
-      sender: sampleChat.participants.find((p) => p._id === currentUserId)!,
-      content: newMessage,
-      createdAt: new Date().toISOString(),
-    };
-
-    setMessages((prev) => [...prev, newMsg]);
-    setNewMessage("");
+    sendMessageMutation.mutate(
+      { chatId, content: newMessage },
+      {
+        onSuccess: (newMsg) => {
+          setMessages((prev) => [...prev, newMsg]);
+          setNewMessage("");
+        },
+      }
+    );
   };
 
   return (
     <div className="min-h-screen bg-background py-12 px-4 flex justify-center items-start">
       <div className="w-full max-w-3xl bg-white dark:bg-muted rounded-2xl shadow-lg flex flex-col h-[85vh] overflow-hidden border">
         {/* Header */}
-        <div className="flex items-center gap-4 px-6 py-4 border-b">
-          <Image
-            src={otherParticipant?.avatar || "/default.jpg"}
-            alt={otherParticipant?.name || "User"}
-            width={40}
-            height={40}
-            className="rounded-full"
-          />
-          <h2 className="text-xl font-semibold">
-            {otherParticipant?.name || "Chat"}
-          </h2>
-        </div>
+        {chatLoading ? (
+          <ChatHeaderSkeleton />
+        ) : (
+          <div className="flex items-center gap-4 px-6 py-4 border-b">
+            <Image
+              src={otherParticipant?.profile_picture_url || "/default.jpg"}
+              alt={otherParticipant?.username || "User"}
+              width={40}
+              height={40}
+              className="rounded-full"
+            />
+            <h2 className="text-xl font-semibold">
+              {otherParticipant?.username || "Chat"}
+            </h2>
+          </div>
+        )}
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
-          {messages.map((msg) => {
-            const isMine = msg.sender._id === currentUserId;
-            return (
-              <div
-                key={msg._id}
-                className={`flex ${isMine ? "justify-end" : "justify-start"}`}
-              >
+          {messagesLoading ? (
+            <MessageSkeleton />
+          ) : messages.length === 0 ? (
+            <div className="text-center text-muted-foreground mt-10">
+              <p className="text-sm">
+                No messages yet. Start the conversation!
+              </p>
+            </div>
+          ) : (
+            messages.map((msg) => {
+              const isMine = msg.sender._id === currentUserId;
+              return (
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-xl text-sm ${
-                    isMine
-                      ? "bg-primary text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-foreground"
-                  }`}
+                  key={msg._id}
+                  className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                 >
-                  {msg.content}
+                  <div
+                    className={`max-w-xs px-4 py-2 rounded-xl text-sm ${
+                      isMine
+                        ? "bg-primary text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-foreground"
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         {/* Input */}
@@ -113,10 +131,12 @@ export default function ChatDetailPage() {
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type your message..."
             className="flex-1 border rounded-full px-4 py-2 text-sm outline-none bg-background"
+            disabled={sendMessageMutation.isPending}
           />
           <button
             onClick={handleSend}
-            className="bg-primary text-white px-4 py-2 rounded-full text-sm"
+            className="bg-primary text-white px-4 py-2 rounded-full text-sm disabled:opacity-50"
+            disabled={sendMessageMutation.isPending || newMessage.trim() === ""}
           >
             Send
           </button>

@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { Chat } from "@/db/models/chat.model";
+import { exists } from "fs";
 
 export const getChats = async (userId: string) => {
   try {
@@ -66,6 +67,23 @@ export const createChat = async (participants: string[]) => {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Failed to create chat",
+    });
+  }
+};
+
+export const doesChatExist = async (participants: string[]) => {
+  try {
+    const chat = await Chat.findOne({
+      participants: { $all: participants },
+      $expr: { $eq: [{ $size: "$participants" }, participants.length] },
+    });
+
+    return { exists: !!chat, chatId: chat ? chat._id : null };
+  } catch (error) {
+    console.error("Error checking chat existence:", error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "Failed to check chat existence",
     });
   }
 };

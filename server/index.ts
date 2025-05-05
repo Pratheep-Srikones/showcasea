@@ -6,6 +6,8 @@ import { likeRouter } from "./routers/like.router";
 import { commentRouter } from "./routers/comment.routes";
 import { followRouter } from "./routers/follow.router";
 import { notificationRouter } from "./routers/notification.router";
+import { chatRouter } from "./routers/chat.router";
+import { messageRouter } from "./routers/message.router";
 
 export const appRouter = router({
   user: userRouter,
@@ -15,6 +17,8 @@ export const appRouter = router({
   comment: commentRouter,
   follow: followRouter,
   notification: notificationRouter,
+  chat: chatRouter,
+  message: messageRouter,
 });
 
 export type AppRouter = typeof appRouter;
