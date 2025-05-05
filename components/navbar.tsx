@@ -42,7 +42,7 @@ export function Navbar() {
   const isLoggingOut = logoutMutation.isPending;
 
   const navItems = [
-    { name: "For You", href: "/foryou" },
+    { name: "Feed", href: "/foryou" },
     { name: "Explore", href: "/explore" },
     { name: "About", href: "/about" },
   ];
@@ -52,7 +52,9 @@ export function Navbar() {
   const userNavItems = [
     { name: "Dashboard", href: "/dashboard" },
     { name: "Profile", href: `/profile/${user?._id} ` },
-    { name: "Account", href: "/account" },
+    { name: "Notifications", href: "/dashboard/notifications" },
+    { name: "Settings", href: "/account" },
+    { name: "Messages", href: "/chat" },
   ];
   const router = useRouter();
   return (
@@ -206,14 +208,6 @@ export function Navbar() {
                 </Link>
               </>
             )}
-            <div className="relative w-full">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input
-                type="search"
-                placeholder="Search..."
-                className="w-full rounded-md border border-input bg-background pl-8 pr-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              />
-            </div>
           </nav>
         </div>
       )}

@@ -36,6 +36,7 @@ export function DashboardSidebar() {
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
     { name: "Settings", href: "/account", icon: Settings },
+    { name: "Messages", href: "/chat", icon: MessageSquare },
   ];
 
   const { logout, user } = useAuthStore();

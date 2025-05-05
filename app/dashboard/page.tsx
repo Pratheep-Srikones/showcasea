@@ -121,7 +121,7 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          <Tabs defaultValue="grid" className="w-full">
+          <Tabs defaultValue="list" className="w-full">
             <div className="flex items-center justify-between">
               <TabsList>
                 <TabsTrigger value="grid" className="flex items-center gap-2">
@@ -163,15 +163,16 @@ export default function DashboardPage() {
                                 "/placeholder.svg"
                               }
                               alt={artwork.title}
-                              width={400}
-                              height={300}
+                              fill
+                              sizes="(max-width: 768px) 100vw, 33vw"
                               loading="lazy"
                               placeholder="blur"
-                              blurDataURL="/placeholder-blur.jpg" // Or a tiny base64 string
-                              className="object-cover transition-transform hover:scale-105"
+                              blurDataURL="/placeholder-blur.jpg"
+                              className="object-cover w-full h-full transition-transform hover:scale-105"
                             />
                           </div>
                         </CardContent>
+
                         <CardHeader className="p-4">
                           <CardTitle className="line-clamp-1 text-lg">
                             {artwork.title}
@@ -250,25 +251,6 @@ export default function DashboardPage() {
                         <div className="ml-4 text-xs text-muted-foreground">
                           {new Date(artwork.createdAt).toLocaleDateString()}
                         </div>
-                        <Button variant="ghost" size="icon" className="ml-4">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="h-4 w-4"
-                          >
-                            <circle cx="12" cy="12" r="1" />
-                            <circle cx="19" cy="12" r="1" />
-                            <circle cx="5" cy="12" r="1" />
-                          </svg>
-                          <span className="sr-only">More options</span>
-                        </Button>
                       </div>
                     ))}
                   </div>
