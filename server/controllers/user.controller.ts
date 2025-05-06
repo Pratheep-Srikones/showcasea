@@ -378,3 +378,29 @@ export const updatePrivacy = async (
 
   return updatedUser;
 };
+
+export const getByName = async (name: string) => {
+  if (!name) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Name is required",
+    });
+  }
+
+  const users = await User.find({
+    $or: [
+      { first_name: { $regex: name, $options: "i" } },
+      { last_name: { $regex: name, $options: "i" } },
+      { username: { $regex: name, $options: "i" } },
+    ],
+  }).select("_id, username, profile_pic_url");
+
+  if (!users || users.length === 0) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "No users found",
+    });
+  }
+
+  return users;
+};

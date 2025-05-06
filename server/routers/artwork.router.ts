@@ -7,6 +7,7 @@ import {
   getArtWorkById,
   getArtWorksByArtistId,
   getArtWorksbyTag,
+  getArtworksByTitle,
   getArtWorkSortedBy,
   getFilteredArtWorkCount,
   getFilteredArtworks,
@@ -115,5 +116,11 @@ export const artWorkRouter = router({
     .input(z.string())
     .mutation(async ({ input }) => {
       return await getArtWorkById(input);
+    }),
+
+  getArtworksByTitle: publicProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      return await getArtworksByTitle(input);
     }),
 });

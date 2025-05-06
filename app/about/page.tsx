@@ -98,17 +98,17 @@ export default function AboutPage() {
             <TeamCard
               name="Sarah Kim"
               role="Founder & Product"
-              image="/team/sarah.jpg"
+              image="https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             />
             <TeamCard
               name="Liam Patel"
               role="Frontend Engineer"
-              image="/team/liam.jpg"
+              image="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             />
             <TeamCard
               name="Anya Silva"
               role="UX Designer"
-              image="/team/anya.jpg"
+              image="https://images.unsplash.com/photo-1535342906566-c30d3e502632?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             />
           </div>
         </div>

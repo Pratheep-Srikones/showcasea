@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "@/lib/trpc/server";
 import { z } from "zod";
 import {
+  getByName,
   getTotalCountsForUser,
   getUserById,
   getUsernameById,
@@ -162,5 +163,11 @@ export const userRouter = router({
         input.comments,
         input.data_collection
       );
+    }),
+
+  getByName: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ input }) => {
+      return await getByName(input.name);
     }),
 });

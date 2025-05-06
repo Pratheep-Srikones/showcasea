@@ -334,3 +334,26 @@ export const getSuggestedArtworks = async (
     });
   }
 };
+
+export const getArtworksByTitle = async (title: string) => {
+  try {
+    const artworks = await ArtWork.find({
+      title: { $regex: title, $options: "i" },
+    })
+      .populate("artist", {
+        first_name: 1,
+        last_name: 1,
+        profile_picture_url: 1,
+        username: 1,
+      })
+      .sort({ createdAt: -1 });
+
+    return artworks;
+  } catch (error) {
+    console.error("Error fetching artworks by title:", title, error);
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An error occurred while fetching artworks by title",
+    });
+  }
+};

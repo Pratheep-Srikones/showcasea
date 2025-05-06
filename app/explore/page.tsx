@@ -19,180 +19,22 @@ import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc/client";
 import { useArtStore } from "@/store/useArtStore";
 import { useRouter } from "next/navigation";
-
-// Dummy data for explore page
-const artworks = [
-  {
-    id: 1,
-    title: "Neon Dreams",
-    creator: {
-      name: "Elena Rodriguez",
-      username: "elenaart",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 245,
-    comments: 32,
-    views: 1890,
-    tags: ["digital", "neon", "cyberpunk"],
-  },
-  {
-    id: 2,
-    title: "Mountain Serenity",
-    creator: {
-      name: "David Kim",
-      username: "davidkim",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 189,
-    comments: 24,
-    views: 1456,
-    tags: ["photography", "nature", "landscape"],
-  },
-  {
-    id: 3,
-    title: "Abstract Emotions",
-    creator: {
-      name: "Aisha Johnson",
-      username: "aishacreates",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 312,
-    comments: 45,
-    views: 2134,
-    tags: ["painting", "abstract", "emotions"],
-  },
-  {
-    id: 4,
-    title: "Urban Geometry",
-    creator: {
-      name: "Marcus Chen",
-      username: "marcusdesigns",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 178,
-    comments: 19,
-    views: 1245,
-    tags: ["photography", "urban", "architecture"],
-  },
-  {
-    id: 5,
-    title: "Digital Flora",
-    creator: {
-      name: "Sofia Patel",
-      username: "sofiadraws",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 267,
-    comments: 38,
-    views: 1879,
-    tags: ["digital", "nature", "illustration"],
-  },
-  {
-    id: 6,
-    title: "Sunset Reflections",
-    creator: {
-      name: "James Wilson",
-      username: "jameswilson",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 203,
-    comments: 27,
-    views: 1567,
-    tags: ["photography", "nature", "sunset"],
-  },
-  {
-    id: 7,
-    title: "Geometric Harmony",
-    creator: {
-      name: "Olivia Martinez",
-      username: "oliviaart",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 156,
-    comments: 21,
-    views: 1234,
-    tags: ["digital", "geometric", "abstract"],
-  },
-  {
-    id: 8,
-    title: "Ethereal Dreams",
-    creator: {
-      name: "Liam Johnson",
-      username: "liamcreates",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 289,
-    comments: 42,
-    views: 2045,
-    tags: ["painting", "surreal", "fantasy"],
-  },
-  {
-    id: 9,
-    title: "Cosmic Voyage",
-    creator: {
-      name: "Nina Carter",
-      username: "ninacreates",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 321,
-    comments: 50,
-    views: 2300,
-    tags: ["digital", "space", "sci-fi"],
-  },
-  {
-    id: 10,
-    title: "Rustic Charm",
-    creator: {
-      name: "Ethan Brown",
-      username: "ethanbrown",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 198,
-    comments: 30,
-    views: 1600,
-    tags: ["photography", "rustic", "vintage"],
-  },
-  {
-    id: 11,
-    title: "Ocean Bliss",
-    creator: {
-      name: "Sophia Lee",
-      username: "sophialee",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 275,
-    comments: 40,
-    views: 2000,
-    tags: ["painting", "ocean", "serenity"],
-  },
-  {
-    id: 12,
-    title: "City Lights",
-    creator: {
-      name: "Ryan Adams",
-      username: "ryanadams",
-      avatar: "/placeholder.svg?height=40&width=40",
-    },
-    image: "/placeholder.svg?height=400&width=600",
-    likes: 240,
-    comments: 35,
-    views: 1900,
-    tags: ["photography", "city", "night"],
-  },
-];
+import { toastError } from "@/lib/utils/toast";
+import SearchResult from "@/components/modals/SearchResult";
 
 export default function ExplorePage() {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleSearch = () => {
+    if (searchQuery) {
+      setModalOpen(true);
+    } else {
+      toastError("Please enter a search term");
+    }
+  };
+
   const [sortBy, setSortBy] = useState("viewCount");
   const { setSelectedArtWork } = useArtStore();
   const router = useRouter();
@@ -230,6 +72,14 @@ export default function ExplorePage() {
       setCurrentArtWorks(currentArtworksData);
     }
   }, [currentArtworksData]);
+  if (modalOpen) {
+    return (
+      <SearchResult
+        searchTerm={searchQuery}
+        onClose={() => setModalOpen(false)}
+      />
+    );
+  }
   return (
     <div className="container mx-auto py-6 lg:py-10">
       <div className="flex flex-col space-y-6">
@@ -249,9 +99,11 @@ export default function ExplorePage() {
                 type="search"
                 placeholder="Search artworks or creators..."
                 className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={handleSearch}>
               <Filter className="h-4 w-4" />
               <span className="sr-only">Filter</span>
             </Button>
