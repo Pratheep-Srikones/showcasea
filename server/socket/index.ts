@@ -7,6 +7,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+app.use("/get", (req, res) => {
+  res.send("Hello from Socket.IO server!");
+});
 const server = http.createServer(app);
 
 const io = new Server(server, {
