@@ -1,6 +1,13 @@
 import { createClient } from "redis";
 
-const redisPub = createClient({ url: process.env.REDIS_URL });
+const redisPub = createClient({
+  username: process.env.REDIS_USERNAME,
+  password: process.env.REDIS_PASSWORD,
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT),
+  },
+});
 
 let redisConnected = false;
 

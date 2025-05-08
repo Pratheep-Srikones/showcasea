@@ -3,18 +3,26 @@ import http from "http";
 import express from "express";
 import { createClient } from "redis";
 import { createAdapter } from "@socket.io/redis-adapter";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "http://localhost:3000" },
+  cors: { origin: process.env.NEXT_SERVER_URL },
 });
 
 // Redis clients for adapter
-const redisPub = createClient({ url: process.env.REDIS_URL });
+const redisPub = createClient({
+  username: process.env.REDIS_USERNAME,
+  password: process.env.REDIS_PASSWORD,
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT) || 17707,
+  },
+});
 const redisSub = redisPub.duplicate(); // Needed for adapter
-
 await redisPub.connect();
 await redisSub.connect();
 
@@ -22,7 +30,14 @@ io.adapter(createAdapter(redisPub, redisSub));
 console.log("Socket.IO server connected to Redis");
 
 // External Redis client for events published by your backend
-const redisEventsClient = createClient({ url: process.env.REDIS_URL });
+const redisEventsClient = createClient({
+  username: process.env.REDIS_USERNAME,
+  password: process.env.REDIS_PASSWORD,
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: Number(process.env.REDIS_PORT) || 17707,
+  },
+});
 await redisEventsClient.connect();
 
 // Listen for newNotification events
