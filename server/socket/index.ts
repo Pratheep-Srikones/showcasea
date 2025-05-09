@@ -14,6 +14,8 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: { origin: process.env.NEXT_SERVER_URL },
+  pingInterval: 25000,
+  pingTimeout: 60000,
 });
 
 // Redis clients for adapter
