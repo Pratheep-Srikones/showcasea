@@ -4,9 +4,20 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useEffect } from "react";
 
 export default function NotAuthenticatedPage() {
   const router = useRouter();
+
+  const { isAuthenticated } = useAuthStore();
+
+  // Redirect to home if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center">

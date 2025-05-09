@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Socket.IO Connection Test</title>
+  </head>
+  <body>
+    <h1>Socket.IO Test</h1>
+    <p id="status">Connecting...</p>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+      const socket = io("https://showcasa.onrender.com", {
+        query: {
+          userId: "test-user-123", // Replace with a valid test userId
+        },
+      });
+
+      socket.on("connect", () => {
+        document.getElementById("status").innerText =
+          "✅ Connected to Socket.IO server!";
+        console.log("Connected!", socket.id);
+      });
+
+      socket.on("disconnect", () => {
+        document.getElementById("status").innerText =
+          "❌ Disconnected from server.";
+        console.log("Disconnected");
+      });
+
+      socket.on("connect_error", (err) => {
+        document.getElementById("status").innerText =
+          "⚠️ Connection failed: " + err.message;
+        console.error("Connection error:", err);
+      });
+    </script>
+  </body>
+</html>
